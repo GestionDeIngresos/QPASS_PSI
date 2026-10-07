@@ -11,7 +11,7 @@ import { obtenerEvento } from '@/lib/eventos/queries'
 // La compra NO es parte de esta historia. Mientras el flujo no exista, los
 // botones salen deshabilitados. Cuando esté listo: pon esto en true y cambia
 // cada <button> por un <Link href={...}> hacia la ruta de compra.
-const COMPRA_HABILITADA = false
+const COMPRA_HABILITADA = true
 // ─────────────────────────────────────────────────────────────────
 
 type Props = { params: Promise<{ id: string }> }
@@ -121,23 +121,27 @@ export default async function EventoDetallePage({ params }: Props) {
               </section>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  disabled={compraDeshabilitada}
-                  title={COMPRA_HABILITADA ? undefined : 'La compra se habilita en otra historia del sprint'}
-                  className="w-full rounded-lg border border-border bg-bg py-3 text-sm font-bold uppercase tracking-wide text-muted transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:w-2/5"
+                <Link
+                  href={`/eventos/${evento.id}/comprar?para=otros`}
+                  aria-disabled={compraDeshabilitada}
+                  tabIndex={compraDeshabilitada ? -1 : undefined}
+                  className={`w-full rounded-lg border border-border bg-bg py-3 text-center text-sm font-bold uppercase tracking-wide text-muted transition hover:text-white sm:w-2/5 ${
+                    compraDeshabilitada ? 'pointer-events-none opacity-50' : ''
+                  }`}
                 >
                   Comprar para otros
-                </button>
-                <Button
-                  type="button"
-                  disabled={compraDeshabilitada}
-                  title={COMPRA_HABILITADA ? undefined : 'La compra se habilita en otra historia del sprint'}
-                  className="sm:w-3/5"
-                >
-                  Comprar entrada
-                </Button>
-              </div>
+                  </Link>
+                  <Link
+                    href={`/eventos/${evento.id}/comprar`}
+                    aria-disabled={compraDeshabilitada}
+                    tabIndex={compraDeshabilitada ? -1 : undefined}
+                    className={`w-full rounded-lg bg-pink py-3 text-center font-bold uppercase tracking-wide text-white shadow-[0_0_25px_rgba(255,0,122,0.35)] transition hover:bg-pink-hover sm:w-3/5 ${
+                      compraDeshabilitada ? 'pointer-events-none opacity-50' : ''
+                    }`}
+                  >
+                    Comprar entrada
+                  </Link>
+                </div>
             </>
           )}
         </div>
