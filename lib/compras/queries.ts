@@ -11,14 +11,14 @@ async function getSupabase() {
 export const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_COMPRAS === "true";
 
 /**
- * ÚNICO sitio que conoce los nombres de columnas de eventos/tipos_ticket.
- * Si tu esquema difiere (p. ej. `titulo` en vez de `nombre`), ajusta SOLO aquí y en `normalizar`.
+ * ÚNICO sitio que conoce las columnas de eventos/tipos_ticket que usa "Mis Compras".
+ * Join: entradas → tipos_ticket → eventos (columnas reales del esquema de QPass).
  */
 const ENTRADA_SELECT = `
   id, compra_id, codigo_qr, estado, creado_en,
   tipos_ticket (
     id, nombre, precio,
-    eventos ( id, nombre, fecha_inicio, fecha_fin, ubicacion )
+    eventos ( id, titulo, foto_url, ubicacion, fecha_evento, tipo_acceso )
   )
 `;
 
@@ -29,20 +29,21 @@ const uno = <T,>(v: T | T[] | null | undefined): T | null =>
 function normalizar(row: any): EntradaConEvento | null {
   const tipo = uno(row.tipos_ticket);
   const evento = uno(tipo?.eventos);
-  if (!tipo || !evento) return null;
+  if (!tipo || !evento) return null; // evento no visible (p. ej. ya no está publicado)
   return {
-    id: row.id,
-    compra_id: row.compra_id,
+    id: String(row.id),
+    compra_id: String(row.compra_id),
     codigo_qr: row.codigo_qr,
     estado: row.estado,
     creado_en: row.creado_en,
-    tipo_ticket: { id: tipo.id, nombre: tipo.nombre, precio: Number(tipo.precio) },
+    tipo_ticket: { id: String(tipo.id), nombre: tipo.nombre, precio: Number(tipo.precio) },
     evento: {
-      id: evento.id,
-      nombre: evento.nombre,
-      fecha_inicio: evento.fecha_inicio,
-      fecha_fin: evento.fecha_fin,
-      ubicacion: evento.ubicacion,
+      id: String(evento.id),
+      titulo: evento.titulo,
+      foto_url: evento.foto_url ?? null,
+      ubicacion: evento.ubicacion ?? null,
+      fecha_evento: evento.fecha_evento,
+      tipo_acceso: evento.tipo_acceso,
     },
   };
 }

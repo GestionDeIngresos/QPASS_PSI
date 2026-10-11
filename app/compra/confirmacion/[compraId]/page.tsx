@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCompra, getUsuarioActual } from "../../../../lib/compras/queries";
-import { formatFechaLarga, formatMoney, formatRangoEvento, numeroCompra } from "../../../../lib/compras/format";
+import { formatFechaCompra, formatFechaEvento, formatMoney, numeroCompra } from "../../../../lib/compras/format";
 import { DescargarComprobante } from "../../../../components/compras/DescargarComprobante";
 
 export const metadata = { title: "Compra confirmada · QPass" };
 export const dynamic = "force-dynamic";
 
-const PAGADO = ["pagado", "completado", "aprobado", "exitoso", "paid"];
+// comprar_entradas() (Dev C) deja la compra en "confirmado" cuando el pago simulado es exitoso.
+const PAGADO = ["confirmado", "pagado", "completado", "aprobado"];
 
 export default async function ConfirmacionPage({ params }: { params: Promise<{ compraId: string }> }) {
   const { compraId } = await params;
@@ -47,7 +48,7 @@ export default async function ConfirmacionPage({ params }: { params: Promise<{ c
             </div>
             <div className="col-span-2">
               <dt className="text-[11px] uppercase tracking-wider text-[#6B648A]">Fecha</dt>
-              <dd className="mt-1 text-white">{formatFechaLarga(compra.creado_en)}</dd>
+              <dd className="mt-1 text-white">{formatFechaCompra(compra.creado_en)}</dd>
             </div>
           </dl>
 
@@ -55,8 +56,8 @@ export default async function ConfirmacionPage({ params }: { params: Promise<{ c
             {compra.entradas.map((e) => (
               <li key={e.id} className="flex items-start justify-between gap-4 py-4">
                 <div className="min-w-0">
-                  <p className="truncate font-extrabold text-white">{e.evento.nombre}</p>
-                  <p className="text-xs text-[#A29DB8]">{formatRangoEvento(e.evento.fecha_inicio, e.evento.fecha_fin)}</p>
+                  <p className="truncate font-extrabold text-white">{e.evento.titulo}</p>
+                  <p className="text-xs text-[#A29DB8]">{formatFechaEvento(e.evento.fecha_evento)}</p>
                   <p className="mt-1 text-xs font-semibold text-[#00F0FF]">{e.tipo_ticket.nombre}</p>
                 </div>
                 <span className="shrink-0 text-sm text-white">{formatMoney(e.tipo_ticket.precio)}</span>

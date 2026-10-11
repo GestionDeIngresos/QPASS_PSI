@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import type { EntradaConEvento } from "../../types/compras";
-import { formatRangoEvento } from "../../lib/compras/format";
+import { formatFechaEvento } from "../../lib/compras/format";
 import { QrCode } from "./QrCode";
 import { DescargarTicketPdf } from "./DescargarTicketPdf";
 
@@ -27,7 +27,7 @@ export function QrModal({ entrada, onClose }: { entrada: EntradaConEvento; onClo
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Código QR de ${entrada.evento.nombre}`}
+        aria-label={`Código QR de ${entrada.evento.titulo}`}
         className="relative max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-2xl border border-[#231B45] bg-[#0F0B1E] p-6 text-center shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
@@ -40,8 +40,8 @@ export function QrModal({ entrada, onClose }: { entrada: EntradaConEvento; onClo
           ×
         </button>
 
-        <h2 className="mt-2 text-lg font-extrabold text-white">{entrada.evento.nombre}</h2>
-        <p className="mt-1 text-xs text-[#A29DB8]">{formatRangoEvento(entrada.evento.fecha_inicio, entrada.evento.fecha_fin)}</p>
+        <h2 className="mt-2 text-lg font-extrabold text-white">{entrada.evento.titulo}</h2>
+        <p className="mt-1 text-xs text-[#A29DB8]">{formatFechaEvento(entrada.evento.fecha_evento)}</p>
         <p className="mt-1 text-xs font-semibold text-[#00F0FF]">{entrada.tipo_ticket.nombre}</p>
 
         <div className="my-5 flex justify-center">

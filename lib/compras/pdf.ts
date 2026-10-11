@@ -1,5 +1,5 @@
 import type { CompraConEntradas, EntradaConEvento } from "../../types/compras";
-import { formatFechaLarga, formatMoney, formatRangoEvento, numeroCompra } from "./format";
+import { formatFechaCompra, formatFechaEvento, formatMoney, numeroCompra } from "./format";
 
 // jsPDF y qrcode se importan dinámicamente: solo se descargan al pulsar el botón.
 const ROSA: [number, number, number] = [255, 0, 122];
@@ -36,12 +36,12 @@ export async function generarTicketPdf(e: EntradaConEvento) {
   doc.setTextColor(20, 20, 30);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.text(doc.splitTextToSize(e.evento.nombre, w - 28), 14, 46);
+  doc.text(doc.splitTextToSize(e.evento.titulo, w - 28), 14, 46);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
   doc.setTextColor(...GRIS);
-  doc.text(formatRangoEvento(e.evento.fecha_inicio, e.evento.fecha_fin), 14, 62);
+  doc.text(formatFechaEvento(e.evento.fecha_evento), 14, 62);
   if (e.evento.ubicacion) doc.text(e.evento.ubicacion, 14, 69);
 
   doc.setTextColor(20, 20, 30);
@@ -61,7 +61,7 @@ export async function generarTicketPdf(e: EntradaConEvento) {
   doc.setFontSize(9);
   doc.text("Presenta este código QR en el acceso. No lo compartas: cada entrada es de un solo uso.", w / 2, 290, { align: "center" });
 
-  guardar(doc, `ticket-${e.evento.nombre}-${e.id.slice(0, 6)}.pdf`);
+  guardar(doc, `ticket-${e.evento.titulo}-${e.id.slice(0, 6)}.pdf`);
 }
 
 /** Comprobante de compra (se usa si la compra no tiene comprobante_url). */
@@ -79,7 +79,7 @@ export async function generarComprobantePdf(c: CompraConEntradas) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(...GRIS);
-  doc.text(formatFechaLarga(c.creado_en), 14, 51);
+  doc.text(formatFechaCompra(c.creado_en), 14, 51);
   doc.text(`Estado del pago: ${c.estado_pago}`, 14, 57);
 
   let y = 72;
@@ -93,7 +93,7 @@ export async function generarComprobantePdf(c: CompraConEntradas) {
 
   doc.setFont("helvetica", "normal");
   for (const e of c.entradas) {
-    doc.text(doc.splitTextToSize(`${e.evento.nombre} — ${e.tipo_ticket.nombre}`, w - 60), 14, y);
+    doc.text(doc.splitTextToSize(`${e.evento.titulo} — ${e.tipo_ticket.nombre}`, w - 60), 14, y);
     doc.text(formatMoney(e.tipo_ticket.precio), w - 14, y, { align: "right" });
     y += 8;
   }

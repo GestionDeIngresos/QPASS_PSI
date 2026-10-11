@@ -1,11 +1,15 @@
+import type { TipoAcceso } from "../lib/eventos/types";
+
 export type EstadoEntrada = "activa" | "usada" | "reportada" | "anulada";
 
-export interface EventoResumen {
+/** Datos del evento asociados a una entrada (columnas reales de la tabla `eventos`). */
+export interface EventoDeEntrada {
   id: string;
-  nombre: string;
-  fecha_inicio: string; // ISO
-  fecha_fin: string | null; // ISO
+  titulo: string;
+  foto_url: string | null;
   ubicacion: string | null;
+  fecha_evento: string; // ISO (timestamptz)
+  tipo_acceso: TipoAcceso; // 'qr_digital' | 'qr_fisico'
 }
 
 export interface TipoTicketResumen {
@@ -21,7 +25,7 @@ export interface EntradaConEvento {
   estado: EstadoEntrada;
   creado_en: string;
   tipo_ticket: TipoTicketResumen;
-  evento: EventoResumen;
+  evento: EventoDeEntrada;
 }
 
 export interface CompraConEntradas {

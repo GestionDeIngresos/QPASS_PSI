@@ -13,13 +13,12 @@ export function MisComprasView({ entradas }: { entradas: EntradaConEvento[] }) {
   const [seleccionada, setSeleccionada] = useState<EntradaConEvento | null>(null);
 
   const { proximos, historial } = useMemo(() => {
-    const ahora = new Date();
     const prox: EntradaConEvento[] = [];
     const hist: EntradaConEvento[] = [];
-    for (const e of entradas) (esProximo(e, ahora) ? prox : hist).push(e);
+    for (const e of entradas) (esProximo(e) ? prox : hist).push(e);
     // próximos: el más cercano primero · historial: el más reciente primero
-    prox.sort((a, b) => +new Date(a.evento.fecha_inicio) - +new Date(b.evento.fecha_inicio));
-    hist.sort((a, b) => +new Date(b.evento.fecha_inicio) - +new Date(a.evento.fecha_inicio));
+    prox.sort((a, b) => +new Date(a.evento.fecha_evento) - +new Date(b.evento.fecha_evento));
+    hist.sort((a, b) => +new Date(b.evento.fecha_evento) - +new Date(a.evento.fecha_evento));
     return { proximos: prox, historial: hist };
   }, [entradas]);
 
