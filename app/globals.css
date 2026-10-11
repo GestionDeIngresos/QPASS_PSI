@@ -7,9 +7,14 @@
   --color-pink: #FF007A;
   --color-pink-hover: #E6006E;
   --color-muted: #9A95B3;
+  --color-cyan: #00F0FF;
 }
 
 body {
   background-color: var(--color-bg);
   color: #ffffff;
+}
+
+input[type="date"] {
+  color-scheme: dark;
 }
