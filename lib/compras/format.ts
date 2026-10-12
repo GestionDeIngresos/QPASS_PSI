@@ -15,6 +15,6 @@ export const formatFechaCompra = (iso: string) => formatearFecha(iso, { conAnio:
 /** "Próximo" mientras el evento no haya ocurrido; si ya ocurrió va al Historial. */
 export const esProximo = (e: EntradaConEvento): boolean => !eventoFinalizado(e.evento.fecha_evento);
 
-export function numeroCompra(id: string): string {
-  return `QP-${id.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
+export function numeroCompra(id: string | number): string {
+  return `QP-${String(id).replace(/-/g, "").slice(0, 8).toUpperCase()}`;
 }

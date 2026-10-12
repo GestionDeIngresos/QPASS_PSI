@@ -17,8 +17,20 @@ const MENSAJE_GENERICO = 'No pudimos completar tu compra. Inténtalo de nuevo en
 const fallo = (error: string, campo?: 'correo'): ResultadoCompra => ({ ok: false, error, campo })
 
 /** Mensajes para los errores que lanza comprar_entradas() (error.message = código) */
-function traducirError(error: { message: string; details?: string | null; hint?: string | null }): ResultadoCompra {
+function traducirError(error: {
+  message: string
+  code?: string
+  details?: string | null
+  hint?: string | null
+}): ResultadoCompra {
   const ticket = error.details ? `«${error.details}»` : 'este tipo de entrada'
+
+  if (error.code === 'PGRST202' || error.code === '42883') {
+    console.error('[comprarEntradas] No se encontró comprar_entradas() en Supabase:', error)
+    return fallo(
+      'Falta configurar la función de compra en Supabase. Ejecuta supabase/compras_politicas_y_funcion.sql en el SQL Editor y vuelve a intentarlo.'
+    )
+  }
 
   switch (error.message.trim()) {
     case 'NO_AUTH':
@@ -96,26 +108,45 @@ export async function comprarEntradas(input: CompraInput): Promise<ResultadoComp
 
   if (error) return traducirError(error)
 
-  const r = data as {
-    compra_id: string | number
-    entradas: number
-    subtotal: number | string
-    cargos_servicio: number | string
-    total: number | string
-    destinatario: string | null
-  } | null
-  if (!r) return fallo(MENSAJE_GENERICO)
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    console.error('[comprarEntradas] comprar_entradas() devolvió una respuesta inválida:', data)
+    return fallo(MENSAJE_GENERICO)
+  }
+
+  const r = data as Record<string, unknown>
+  const compraId =
+    typeof r.compra_id === 'string' || typeof r.compra_id === 'number' ? String(r.compra_id) : ''
+  const entradas = Number(r.entradas)
+  const subtotal = Number(r.subtotal)
+  const cargos = Number(r.cargos_servicio)
+  const total = Number(r.total)
+  const destinatario =
+    typeof r.destinatario === 'string' || r.destinatario === null ? r.destinatario : undefined
+
+  if (
+    !compraId ||
+    !Number.isInteger(entradas) ||
+    entradas < 1 ||
+    !Number.isFinite(subtotal) ||
+    !Number.isFinite(cargos) ||
+    !Number.isFinite(total) ||
+    destinatario === undefined
+  ) {
+    console.error('[comprarEntradas] comprar_entradas() devolvió datos incompletos:', data)
+    return fallo(MENSAJE_GENERICO)
+  }
 
   // El cupo cambió: que el detalle del evento no muestre números viejos.
   revalidatePath(`/eventos/${eventoId}`)
+  revalidatePath('/mis-compras')
 
   return {
     ok: true,
-    compraId: String(r.compra_id),
-    entradas: r.entradas,
-    subtotal: Number(r.subtotal),
-    cargos: Number(r.cargos_servicio),
-    total: Number(r.total),
-    destinatario: r.destinatario,
+    compraId,
+    entradas,
+    subtotal,
+    cargos,
+    total,
+    destinatario,
   }
 }

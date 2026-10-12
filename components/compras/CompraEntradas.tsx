@@ -2,21 +2,16 @@
 
 import { useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { comprarEntradas } from '@/app/eventos/[id]/comprar/actions'
 import { ResumenEvento } from '@/components/compras/ResumenEvento'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { MAX_LINEAS, TASA_CARGO_SERVICIO, calcularResumen, maximoPorLinea } from '@/lib/compras/calculo'
-import type { ResultadoCompra } from '@/lib/compras/types'
 import { formatearPrecio } from '@/lib/eventos/format'
 import type { EventoDetalle } from '@/lib/eventos/types'
 
-// ─── ZONA EDITABLE: rutas ────────────────────────────────────────
-const RUTA_MIS_COMPRAS = '/mis-compras' // ajusta cuando exista la pantalla "Mis Compras"
-// ─────────────────────────────────────────────────────────────────
-
 type Linea = { clave: number; tipoTicketId: string; cantidad: number }
-type CompraExitosa = Extract<ResultadoCompra, { ok: true }>
 
 type Props = {
   evento: EventoDetalle
@@ -30,6 +25,7 @@ const claseBotonCantidad =
   'flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-bg text-lg text-white transition hover:border-pink disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border'
 
 export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
+  const router = useRouter()
   const tickets = evento.tickets
   const disponibles = tickets.filter((t) => t.cantidad_disponible > 0)
 
@@ -41,7 +37,6 @@ export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
   const [correo, setCorreo] = useState('')
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null)
   const [errorCorreo, setErrorCorreo] = useState<string | null>(null)
-  const [exito, setExito] = useState<CompraExitosa | null>(null)
   const [pendiente, startTransition] = useTransition()
 
   const ticketDe = (id: string) => tickets.find((t) => t.id === id)
@@ -95,7 +90,7 @@ export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
           lineas: lineas.map(({ tipoTicketId, cantidad }) => ({ tipoTicketId, cantidad })),
           correoDestino: paraOtros ? correo : null,
         })
-        if (r.ok) setExito(r)
+        if (r.ok) router.push(`/compra/confirmacion/${encodeURIComponent(r.compraId)}`)
         else if (r.campo === 'correo') setErrorCorreo(r.error)
         else setErrorGeneral(r.error)
       } catch {
@@ -124,17 +119,14 @@ export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
       </Link>
 
       <h1 className="mb-8 text-3xl font-extrabold text-white md:text-4xl">
-        {exito ? 'Compra realizada' : titulo}
+        {titulo}
       </h1>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)] lg:items-start lg:gap-10">
         <ResumenEvento evento={evento} />
 
         <section className="rounded-3xl border border-border bg-card p-6 shadow-[0_0_40px_rgba(255,0,122,0.12)] sm:p-10">
-          {exito ? (
-            <Confirmacion exito={exito} destinatario={paraOtros ? (exito.destinatario ?? correo) : null} />
-          ) : (
-            <form onSubmit={enviar}>
+          <form onSubmit={enviar}>
               <h2 className="text-2xl font-extrabold text-white">
                 {paraOtros ? 'Información del destinatario' : 'Configura tu entrada'}
               </h2>
@@ -315,63 +307,8 @@ export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
               <p className="mt-3 text-center text-xs text-muted">
                 Pago simulado: por ahora no se realiza ningún cobro real.
               </p>
-            </form>
-          )}
+          </form>
         </section>
-      </div>
-    </div>
-  )
-}
-
-// ─── Pantalla de éxito (reemplaza al formulario) ──────────────────
-function Confirmacion({ exito, destinatario }: { exito: CompraExitosa; destinatario: string | null }) {
-  return (
-    <div className="flex flex-col items-center text-center">
-      <span className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-cyan/10 text-cyan">
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m5 12 5 5 9-10" />
-        </svg>
-      </span>
-      <h2 className="text-2xl font-extrabold text-white">¡Compra confirmada!</h2>
-      <p className="mt-2 max-w-md text-sm leading-relaxed text-muted">
-        {exito.entradas === 1 ? 'Generamos 1 entrada' : `Generamos ${exito.entradas} entradas`}{' '}
-        {destinatario ? (
-          <>
-            para <span className="font-semibold text-white">{destinatario}</span>.
-          </>
-        ) : (
-          'en tu perfil.'
-        )}
-      </p>
-
-      <dl className="mt-8 w-full max-w-sm space-y-3 border-t border-border pt-6 text-sm">
-        <div className="flex justify-between text-muted">
-          <dt>Subtotal</dt>
-          <dd className="text-white">{formatearPrecio(exito.subtotal)}</dd>
-        </div>
-        <div className="flex justify-between text-muted">
-          <dt>Gastos de servicio</dt>
-          <dd className="text-white">{formatearPrecio(exito.cargos)}</dd>
-        </div>
-        <div className="flex items-end justify-between border-t border-border pt-4">
-          <dt className="font-bold text-pink">Total</dt>
-          <dd className="text-2xl font-extrabold text-pink">{formatearPrecio(exito.total)}</dd>
-        </div>
-      </dl>
-
-      <div className="mt-8 flex w-full max-w-sm flex-col gap-3">
-        <Link
-          href={RUTA_MIS_COMPRAS}
-          className="w-full rounded-lg bg-pink py-3 text-center text-sm font-bold uppercase tracking-wide text-white shadow-[0_0_25px_rgba(255,0,122,0.35)] transition hover:bg-pink-hover"
-        >
-          Ver mis compras
-        </Link>
-        <Link
-          href="/eventos"
-          className="w-full rounded-lg border border-border bg-bg py-3 text-center text-sm font-bold uppercase tracking-wide text-muted transition hover:text-white"
-        >
-          Volver a eventos
-        </Link>
       </div>
     </div>
   )

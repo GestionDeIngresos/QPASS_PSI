@@ -84,7 +84,7 @@ export default function LoginPage() {
       <p className="text-center text-sm text-white">
         ¿No tienes cuenta?{' '}
         <Link href="/register" className="font-semibold text-pink hover:underline">
-          Crear cuenta
+          Crear una cuenta
         </Link>
       </p>
     </AuthCard>
