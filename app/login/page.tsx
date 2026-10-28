@@ -29,7 +29,8 @@ export default function LoginPage() {
       setError('Correo o contraseña incorrectos.')
       return
     }
-    router.push('/')
+    const next = new URLSearchParams(window.location.search).get('next')
+    router.push(next && next.startsWith('/') && !next.startsWith('//') ? next : '/eventos')
     router.refresh()
   }
 
@@ -84,7 +85,7 @@ export default function LoginPage() {
       <p className="text-center text-sm text-white">
         ¿No tienes cuenta?{' '}
         <Link href="/register" className="font-semibold text-pink hover:underline">
-          Crear cuenta
+          Crear una cuenta
         </Link>
       </p>
     </AuthCard>
