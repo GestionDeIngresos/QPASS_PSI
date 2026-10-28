@@ -45,16 +45,6 @@ export function formatearFecha(
   return texto
 }
 
-/** "2026-11-15T02:30:00Z" → "2026-11-14": día calendario en hora de Bolivia (el mismo que muestra la tarjeta) */
-export function diaLocal(iso: string): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: ZONA_HORARIA,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date(iso))
-}
-
 /** true si el evento ya ocurrió */
 export function eventoFinalizado(iso: string): boolean {
   const fecha = new Date(iso)

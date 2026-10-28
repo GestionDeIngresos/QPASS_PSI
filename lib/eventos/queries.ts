@@ -6,7 +6,7 @@
 // ════════════════════════════════════════════════════════════════
 import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { OFFSET_ZONA, diaLocal } from '@/lib/eventos/format'
+import { OFFSET_ZONA } from '@/lib/eventos/format'
 import type {
   Categoria,
   EventoDetalle,
@@ -107,13 +107,8 @@ function diaARango(fecha: string): { desde: string; hasta: string } | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return null
   const inicio = new Date(`${fecha}T00:00:00${OFFSET_ZONA}`)
   if (Number.isNaN(inicio.getTime())) return null
-  // Se amplía ±1 día para no perder eventos por diferencias de zona horaria;
-  // el día exacto se afina después con diaLocal() (misma zona que la tarjeta).
-  const DIA = 24 * 60 * 60 * 1000
-  return {
-    desde: new Date(inicio.getTime() - DIA).toISOString(),
-    hasta: new Date(inicio.getTime() + 2 * DIA).toISOString(),
-  }
+  const fin = new Date(inicio.getTime() + 24 * 60 * 60 * 1000)
+  return { desde: inicio.toISOString(), hasta: fin.toISOString() }
 }
 
 type SupabaseServidor = Awaited<ReturnType<typeof createClient>>
@@ -143,7 +138,6 @@ type FiltrosValidados = {
   q: string
   categoriaId: string
   rango: { desde: string; hasta: string } | null
-  dia: string | null // "YYYY-MM-DD" validado, o null si no se filtra por fecha
 }
 
 async function consultar(
@@ -161,21 +155,6 @@ async function consultar(
   if (filtros.categoriaId) consulta = consulta.eq('categoria_id', filtros.categoriaId)
   if (filtros.rango) {
     consulta = consulta.gte('fecha_evento', filtros.rango.desde).lt('fecha_evento', filtros.rango.hasta)
-  }
-
-  // Con filtro de fecha: se trae el rango ampliado y se afina en JS por día local
-  if (filtros.dia) {
-    const { data, error } = await consulta.order('fecha_evento', { ascending: true }).limit(200)
-    if (error) throw new Error(`No se pudieron cargar los eventos: ${error.message}`)
-    const ahoraMs = new Date(ahoraISO).getTime()
-    const delDia = ((data ?? []) as unknown as FilaEvento[])
-      .map(normalizarResumen)
-      .filter(
-        (e) =>
-          diaLocal(e.fecha_evento) === filtros.dia &&
-          (new Date(e.fecha_evento).getTime() >= ahoraMs) === (modo === 'proximos')
-      )
-    return (modo === 'proximos' ? delDia : delDia.reverse()).slice(0, LIMITE_POR_SECCION)
   }
 
   consulta =
@@ -203,7 +182,6 @@ export async function buscarEventos(
     q: filtros.q,
     categoriaId,
     rango: diaARango(filtros.fecha),
-    dia: diaARango(filtros.fecha) ? filtros.fecha : null,
   }
 
   const [proximos, pasados] = await Promise.all([
