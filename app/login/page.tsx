@@ -29,7 +29,8 @@ export default function LoginPage() {
       setError('Correo o contraseña incorrectos.')
       return
     }
-    router.push('/')
+    const next = new URLSearchParams(window.location.search).get('next')
+    router.push(next && next.startsWith('/') && !next.startsWith('//') ? next : '/eventos')
     router.refresh()
   }
 

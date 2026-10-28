@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { OcultarEnPanel } from "@/components/OcultarEnPanel";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -19,9 +20,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={poppins.variable}>
       <body className="flex min-h-screen flex-col font-sans">
-        <Header />
+        <OcultarEnPanel>
+          <Header />
+        </OcultarEnPanel>
         <main className="flex-1">{children}</main>
-        <Footer />
+        <OcultarEnPanel>
+          <Footer />
+        </OcultarEnPanel>
       </body>
     </html>
   );
