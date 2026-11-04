@@ -8,6 +8,7 @@ const PREFIJOS_CON_MENU_PROPIO = ['/admin']
 
 export function OcultarEnPanel({ children }: { children: React.ReactNode }) {
   const ruta = usePathname()
+  if (ruta === '/') return null // la Landing trae su propia barra y pie (Dev D)
   if (PREFIJOS_CON_MENU_PROPIO.some((p) => ruta === p || ruta.startsWith(p + '/'))) return null
   return <>{children}</>
 }
