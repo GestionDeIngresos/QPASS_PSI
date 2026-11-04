@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { CerrarSesionButton } from '@/components/CerrarSesionButton'
+import { AccionesCuenta } from '@/components/AccionesCuenta'
 
 const ENLACES = [
   { href: '#quienes-somos', texto: 'Quiénes somos' },
@@ -14,6 +14,10 @@ export async function LandingNav() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  const { data: perfil } = user
+    ? await supabase.from('usuarios').select('nombre, rol').eq('id', user.id).maybeSingle()
+    : { data: null }
 
   return (
     <header className="sticky top-0 z-30 border-b border-border/60 bg-bg/80 backdrop-blur">
@@ -37,7 +41,7 @@ export async function LandingNav() {
               <Link href="/mis-compras" className="text-muted transition hover:text-white">
                 Mis compras
               </Link>
-              <CerrarSesionButton />
+              <AccionesCuenta perfil={{ nombre: perfil?.nombre ?? '', rol: perfil?.rol ?? 'cliente', correo: user.email ?? '' }} />
             </>
           ) : (
             <>

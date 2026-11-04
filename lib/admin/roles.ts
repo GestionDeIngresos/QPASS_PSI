@@ -1,9 +1,10 @@
 // Roles de QPass (enum public.rol_usuario) con su etiqueta y color del mockup. Se usa en cliente y servidor.
-export const ROLES = ['cliente', 'escaneador', 'supervisor', 'devolucion', 'ayudante', 'negocio', 'admin'] as const
+export const ROLES = ['cliente', 'organizador', 'escaneador', 'supervisor', 'devolucion', 'ayudante', 'negocio', 'admin'] as const
 export type Rol = (typeof ROLES)[number]
 
 export const ROL_INFO: Record<Rol, { etiqueta: string; estilo: string }> = {
   cliente: { etiqueta: 'Cliente', estilo: 'border-cyan text-cyan' },
+  organizador: { etiqueta: 'Organizador', estilo: 'border-[#9D00FF] text-[#B44DFF]' },
   escaneador: { etiqueta: 'Escaneador', estilo: 'border-pink text-pink' },
   supervisor: { etiqueta: 'Supervisor', estilo: 'border-[#9D00FF] text-[#B44DFF]' },
   devolucion: { etiqueta: 'Devolución', estilo: 'border-amber-400 text-amber-400' },

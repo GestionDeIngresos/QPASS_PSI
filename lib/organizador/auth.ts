@@ -1,8 +1,6 @@
 // ════════════════════════════════════════════════════════════════
 // Sesión del panel del organizador (Sprint 2 · Dev B). SOLO servidor.
-// Cualquier usuario con sesión puede entrar: un cliente envía una solicitud
-// y, cuando el admin la aprueba, gestiona su evento. Lo que cada quien puede
-// hacer lo decide RLS (supabase/sprint2_devB_organizador.sql), no este guard.
+// Solo el rol organizador accede al panel y a sus server actions.
 // ════════════════════════════════════════════════════════════════
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -10,19 +8,26 @@ import { createClient } from '@/lib/supabase/server'
 export type PerfilOrganizador = { nombre: string; rol: string }
 
 /** Para server actions: { supabase, user } o null si no hay sesión */
-export async function obtenerSesion() {
+async function leerSesion() {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return null
-  return { supabase, user }
+  const { data: perfil } = await supabase.from('usuarios').select('rol').eq('id', user.id).maybeSingle()
+  return { supabase, user, rol: perfil?.rol }
+}
+
+export async function obtenerSesion() {
+  const sesion = await leerSesion()
+  return sesion?.rol === 'organizador' ? sesion : null
 }
 
 /** Para páginas/layouts: sin sesión → login (y vuelve a donde estaba) */
 export async function exigirSesion(volverA = '/organizador/eventos') {
-  const sesion = await obtenerSesion()
+  const sesion = await leerSesion()
   if (!sesion) redirect(`/login?next=${encodeURIComponent(volverA)}`)
+  if (sesion.rol !== 'organizador') redirect('/eventos')
   return sesion
 }
 

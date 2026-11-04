@@ -7,8 +7,6 @@ const SELECT =
 
 // Buscador + filtros de Rol/Estado. Es un <form method="get">: los filtros viven en la URL.
 export function FiltrosUsuarios({ q, rol, estado }: { q: string; rol: string; estado: string }) {
-  const enviar = (e: React.ChangeEvent<HTMLSelectElement>) => e.currentTarget.form?.requestSubmit()
-
   return (
     <form action="/admin/usuarios" method="get" className="flex flex-1 flex-wrap items-center gap-3">
       <input
@@ -20,7 +18,7 @@ export function FiltrosUsuarios({ q, rol, estado }: { q: string; rol: string; es
         aria-label="Buscar usuarios"
         className="min-w-0 flex-1 basis-56 rounded-lg border border-border bg-bg px-4 py-2 text-sm text-white outline-none placeholder:text-muted/60 focus:border-pink"
       />
-      <select name="rol" defaultValue={rol} onChange={enviar} aria-label="Filtrar por rol" className={SELECT}>
+      <select name="rol" defaultValue={rol} aria-label="Filtrar por rol" className={SELECT}>
         <option value="">Rol: Todos</option>
         {ROLES.map((r) => (
           <option key={r} value={r}>
@@ -28,11 +26,14 @@ export function FiltrosUsuarios({ q, rol, estado }: { q: string; rol: string; es
           </option>
         ))}
       </select>
-      <select name="estado" defaultValue={estado} onChange={enviar} aria-label="Filtrar por estado" className={SELECT}>
+      <select name="estado" defaultValue={estado} aria-label="Filtrar por estado" className={SELECT}>
         <option value="">Estado: Todos</option>
         <option value="activos">Estado: Activos</option>
         <option value="inactivos">Estado: Inactivos</option>
       </select>
+      <button type="submit" className="rounded-lg border border-cyan px-5 py-2 text-xs font-bold text-cyan transition hover:bg-cyan/10">
+        Filtrar
+      </button>
     </form>
   )
 }

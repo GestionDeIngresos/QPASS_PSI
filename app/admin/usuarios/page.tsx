@@ -106,7 +106,7 @@ export default async function UsuariosPage({
       <h1 className="mb-6 text-3xl font-extrabold text-white">Gestión de Usuarios</h1>
 
       <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-4">
-        <FiltrosUsuarios q={filtros.q} rol={filtros.rol} estado={filtros.estado} />
+        <FiltrosUsuarios key={listadoHref} q={filtros.q} rol={filtros.rol} estado={filtros.estado} />
         <Link
           href={con({ nuevo: '1' })}
           scroll={false}

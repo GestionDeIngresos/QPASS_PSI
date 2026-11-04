@@ -94,7 +94,7 @@ export async function crearUsuario(datos: DatosUsuario): Promise<ResultadoUsuari
   }
 
   if (v.eventoId) {
-    const { error } = await admin.supabase.from('asignaciones_staff').insert({ usuario_id: id, evento_id: v.eventoId })
+    const { error } = await admin.supabase.from('asignaciones_staff').insert({ usuario_id: id, evento_id: v.eventoId, rol_staff: v.rol })
     if (error) {
       revalidatePath(VOLVER)
       return { ok: false, error: 'Usuario creado, pero no se pudo asignar el evento. Edítalo para reintentar.' }
@@ -153,7 +153,7 @@ export async function editarUsuario(datos: DatosUsuario): Promise<ResultadoUsuar
   if (v.eventoId) {
     const { error: errorAsignar } = await admin.supabase
       .from('asignaciones_staff')
-      .insert({ usuario_id: id, evento_id: v.eventoId })
+      .insert({ usuario_id: id, evento_id: v.eventoId, rol_staff: v.rol })
     if (errorAsignar) return { ok: false, error: 'Datos guardados, pero no se pudo asignar el evento.' }
   }
 

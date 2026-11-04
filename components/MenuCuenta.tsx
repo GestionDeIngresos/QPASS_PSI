@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { CerrarSesionButton } from '@/components/CerrarSesionButton'
 
 export type PerfilMenu = { nombre: string; correo: string; rol: string }
 
@@ -11,16 +10,14 @@ export type PerfilMenu = { nombre: string; correo: string; rol: string }
 // /admin es de Dev A; /organizador/* es de Dev B.
 const ENLACES_POR_ROL: Record<string, { href: string; etiqueta: string }[]> = {
   admin: [{ href: '/admin', etiqueta: 'Panel de administración' }],
-  cliente: [
-    { href: '/organizador/solicitudes', etiqueta: 'Mis solicitudes de evento' },
-    { href: '/organizador/eventos', etiqueta: 'Mis eventos' },
-  ],
-  negocio: [
+  organizador: [
     { href: '/organizador/solicitudes', etiqueta: 'Mis solicitudes de evento' },
     { href: '/organizador/eventos', etiqueta: 'Mis eventos' },
   ],
 }
 const ENLACES_COMUNES = [
+  { href: '/', etiqueta: 'Inicio' },
+  { href: '/eventos', etiqueta: 'Explorar eventos' },
   { href: '/mis-compras', etiqueta: 'Mis compras' },
   { href: '/mi-cuenta/perfil', etiqueta: 'Editar perfil' },
 ]
@@ -49,9 +46,7 @@ export function Avatar({ nombre, grande = false }: { nombre: string; grande?: bo
 
 // Menú "Mi Cuenta" del Header (HU 5): perfil, enlaces por rol, editar perfil y cerrar sesión
 export function MenuCuenta({ perfil }: { perfil: PerfilMenu }) {
-  const router = useRouter()
   const [abierto, setAbierto] = useState(false)
-  const [saliendo, setSaliendo] = useState(false)
   const caja = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -68,14 +63,6 @@ export function MenuCuenta({ perfil }: { perfil: PerfilMenu }) {
     }
   }, [abierto])
 
-  async function cerrarSesion() {
-    setSaliendo(true)
-    await createClient().auth.signOut()
-    setAbierto(false)
-    router.push('/login')
-    router.refresh()
-  }
-
   const enlaces = [...(ENLACES_POR_ROL[perfil.rol] ?? []), ...ENLACES_COMUNES]
   const cerrar = () => setAbierto(false)
 
@@ -85,7 +72,6 @@ export function MenuCuenta({ perfil }: { perfil: PerfilMenu }) {
         type="button"
         onClick={() => setAbierto((a) => !a)}
         aria-expanded={abierto}
-        aria-haspopup="menu"
         className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${
           abierto ? 'border-[#9D00FF] text-pink' : 'border-transparent bg-white/5 text-white hover:text-pink'
         }`}
@@ -96,7 +82,6 @@ export function MenuCuenta({ perfil }: { perfil: PerfilMenu }) {
 
       {abierto && (
         <div
-          role="menu"
           className="absolute right-0 z-50 mt-3 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-border bg-card p-5 text-center shadow-[0_0_40px_rgba(255,0,122,0.18)]"
         >
           <div className="flex justify-center">
@@ -110,7 +95,6 @@ export function MenuCuenta({ perfil }: { perfil: PerfilMenu }) {
               <Link
                 key={e.href}
                 href={e.href}
-                role="menuitem"
                 onClick={cerrar}
                 className={`rounded-lg px-4 py-2.5 text-xs font-bold uppercase tracking-wide transition ${
                   e.href === '/mi-cuenta/perfil'
@@ -123,15 +107,7 @@ export function MenuCuenta({ perfil }: { perfil: PerfilMenu }) {
             ))}
           </nav>
 
-          <button
-            type="button"
-            role="menuitem"
-            onClick={cerrarSesion}
-            disabled={saliendo}
-            className="mt-4 text-xs font-semibold text-pink hover:underline disabled:opacity-50"
-          >
-            {saliendo ? 'Saliendo...' : 'Cerrar sesión'}
-          </button>
+          <CerrarSesionButton className="mt-4 text-xs font-semibold text-pink hover:underline disabled:opacity-50" />
         </div>
       )}
     </div>

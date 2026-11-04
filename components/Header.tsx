@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { MenuCuenta } from '@/components/MenuCuenta'
+import { AccionesCuenta } from '@/components/AccionesCuenta'
 
 const NAV = [
   { href: '/eventos', etiqueta: 'Explorar Eventos' },
@@ -19,7 +19,7 @@ export async function Header() {
     : { data: null }
 
   return (
-    <header className="flex items-center justify-between gap-4 border-b border-border bg-card px-6 py-4 md:px-10">
+    <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border bg-card px-6 py-4 md:px-10">
       <Link href="/" className="flex items-center gap-2 text-xl font-bold text-white">
         <span className="h-2 w-2 rounded-full bg-pink" />
         <span className="underline decoration-pink underline-offset-4">Q</span>Pass
@@ -36,7 +36,7 @@ export async function Header() {
       )}
 
       {user ? (
-        <MenuCuenta
+        <AccionesCuenta
           perfil={{
             nombre: perfil?.nombre ?? '',
             correo: perfil?.correo ?? user.email ?? '',
