@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { obtenerSesionActual } from '@/lib/auth/sesion'
 import { AccionesCuenta } from '@/components/AccionesCuenta'
 
 const ENLACES = [
@@ -10,14 +10,9 @@ const ENLACES = [
 
 /** Barra superior de la Landing (reemplaza al Header global en "/") */
 export async function LandingNav() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  const { data: perfil } = user
-    ? await supabase.from('usuarios').select('nombre, rol').eq('id', user.id).maybeSingle()
-    : { data: null }
+  const sesion = await obtenerSesionActual()
+  const user = sesion?.user
+  const perfil = sesion?.perfil
 
   return (
     <header className="sticky top-0 z-30 border-b border-border/60 bg-bg/80 backdrop-blur">

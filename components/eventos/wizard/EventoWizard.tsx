@@ -51,6 +51,8 @@ export function EventoWizard({
   const [error, setError] = useState<string | null>(null)
   const [exito, setExito] = useState<string | null>(null)
   const [guardando, iniciar] = useTransition()
+  const [subidas, setSubidas] = useState(0)
+  const imagenSubiendo = (valor: boolean) => setSubidas(n => Math.max(0, n + (valor ? 1 : -1)))
 
   const cambiar = (parcial: Partial<EventoBorrador>) => {
     setDatos((d) => ({ ...d, ...parcial }))
@@ -58,6 +60,7 @@ export function EventoWizard({
   }
 
   function siguiente() {
+    if (subidas > 0) return setError('Espera a que termine la subida de la imagen.')
     const problema = validarPaso(paso, datos)
     if (problema) return setError(problema)
     setError(null)
@@ -70,6 +73,7 @@ export function EventoWizard({
   }
 
   function guardar(final: AccionFinal) {
+    if (guardando || exito !== null || subidas > 0) return
     const invalido = validarTodo(datos)
     if (invalido) {
       setPaso(invalido.paso)
@@ -77,15 +81,20 @@ export function EventoWizard({
     }
     setError(null)
     iniciar(async () => {
-      const resultado = await accion(datos, final)
-      if (!resultado.ok) return setError(resultado.error)
-      setExito(resultado.mensaje ?? 'Guardado correctamente.')
-      if (redirigirA) setTimeout(() => router.push(redirigirA), 1200)
-      else router.refresh()
+      try {
+        const resultado = await accion(datos, final)
+        if (!resultado.ok) return setError(resultado.error)
+        setExito(resultado.mensaje ?? 'Guardado correctamente.')
+        if (redirigirA) router.push(redirigirA)
+        else router.refresh()
+      } catch (error) {
+        console.error('EventoWizard: fallo al confirmar el guardado', error)
+        setError('No pudimos confirmar la respuesta del servidor. Tus datos siguen en el formulario. Revisa si el evento ya se publicó antes de volver a guardar. Si la sesión venció, inicia sesión de nuevo en otra pestaña.')
+      }
     })
   }
 
-  const ocupado = guardando || exito !== null
+  const ocupado = guardando || exito !== null || subidas > 0
   const textoFinal = modo === 'solicitud' ? 'Enviar solicitud' : 'Guardar cambios'
 
   return (
@@ -120,8 +129,8 @@ export function EventoWizard({
       </ol>
 
       <section className="rounded-2xl border border-border bg-card p-6 shadow-[0_0_40px_rgba(255,0,122,0.08)] md:p-8">
-        {paso === 1 && <PasoInformacion datos={datos} cambiar={cambiar} categorias={categorias} />}
-        {paso === 2 && <PasoUbicacion datos={datos} cambiar={cambiar} />}
+        {paso === 1 && <PasoInformacion datos={datos} cambiar={cambiar} categorias={categorias} onSubiendo={imagenSubiendo} />}
+        {paso === 2 && <PasoUbicacion datos={datos} cambiar={cambiar} onSubiendo={imagenSubiendo} />}
         {paso === 3 && <PasoTickets datos={datos} cambiar={cambiar} />}
         {paso === 4 && <PasoCronograma datos={datos} cambiar={cambiar} modo={modo} />}
 
@@ -150,7 +159,7 @@ export function EventoWizard({
           )}
 
           {paso < 4 ? (
-            <Button type="button" onClick={siguiente} className="sm:w-auto sm:px-8">
+            <Button type="button" onClick={siguiente} disabled={ocupado} className="sm:w-auto sm:px-8">
               Siguiente
             </Button>
           ) : (

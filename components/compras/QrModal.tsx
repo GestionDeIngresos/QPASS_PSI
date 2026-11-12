@@ -43,6 +43,7 @@ export function QrModal({ entrada, onClose }: { entrada: EntradaConEvento; onClo
         <h2 className="mt-2 text-lg font-extrabold text-white">{entrada.evento.titulo}</h2>
         <p className="mt-1 text-xs text-[#A29DB8]">{formatFechaEvento(entrada.evento.fecha_evento)}</p>
         <p className="mt-1 text-xs font-semibold text-[#00F0FF]">{entrada.tipo_ticket.nombre}</p>
+        {entrada.evento.tipo_acceso === 'qr_fisico' && <p className="mt-3 text-xs text-pink">Muestra este código y tu carnet para que el administrador vincule tu manilla.</p>}
 
         <div className="my-5 flex justify-center">
           <QrCode value={entrada.codigo_qr} size={220} />

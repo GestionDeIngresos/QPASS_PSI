@@ -1,5 +1,6 @@
 import type { CompraConEntradas, EntradaConEvento } from "../../types/compras";
 import { MOCK_COMPRA, MOCK_ENTRADAS } from "./mock";
+import { obtenerSesionActual } from '@/lib/auth/sesion';
 
 /** Carga el cliente de Supabase solo cuando NO estamos en modo mock. */
 async function getSupabase() {
@@ -51,9 +52,7 @@ function normalizar(row: any): EntradaConEvento | null {
 /** Usuario autenticado o null (las páginas deciden el redirect). */
 export async function getUsuarioActual() {
   if (USE_MOCK) return { id: "mock-user" };
-  const supabase = await getSupabase();
-  const { data } = await supabase.auth.getUser();
-  return data.user;
+  return (await obtenerSesionActual())?.user ?? null;
 }
 
 /** Entradas asignadas al usuario (usuario_destino_id). La RLS es la segunda barrera de seguridad. */

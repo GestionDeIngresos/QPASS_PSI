@@ -38,6 +38,7 @@ export async function guardarEventoCompleto(
     p_organizador_id: opciones.organizadorId ?? null,
     p_estado: opciones.estado ?? null,
     p_datos: {
+      version_edicion: datos.versionEdicion,
       titulo: datos.titulo.trim(),
       descripcion: datos.descripcion.trim(),
       foto_url: datos.fotoUrl,
@@ -49,6 +50,7 @@ export async function guardarEventoCompleto(
       categoria_id: datos.categoriaId && Number.isInteger(categoria) ? categoria : null,
     },
     p_tickets: datos.tickets.map((t) => ({
+      version_edicion: t.versionEdicion,
       id: t.id ? Number(t.id) : null,
       nombre: t.nombre.trim(),
       descripcion: t.descripcion.trim(),
@@ -96,6 +98,7 @@ export async function crearSolicitudDeEvento(
 
 // ─── Cargar un evento existente como borrador (para editar) ──────
 type FilaTicket = {
+  version_edicion: string | number
   id: string | number
   nombre: string
   descripcion: string | null
@@ -104,6 +107,7 @@ type FilaTicket = {
   limite_por_usuario: number | null
 }
 type FilaEvento = {
+  version_edicion: string | number
   id: string | number
   titulo: string
   descripcion: string | null
@@ -125,7 +129,7 @@ export async function cargarBorrador(
   const { data, error } = await supabase
     .from('eventos')
     .select(
-      'id, titulo, descripcion, foto_url, ubicacion, mapa_url, fecha_evento, fecha_fin, tipo_acceso, categoria_id, tipos_ticket ( id, nombre, descripcion, precio, cantidad_disponible, limite_por_usuario )'
+      'id, version_edicion, titulo, descripcion, foto_url, ubicacion, mapa_url, fecha_evento, fecha_fin, tipo_acceso, categoria_id, tipos_ticket ( id, version_edicion, nombre, descripcion, precio, cantidad_disponible, limite_por_usuario )'
     )
     .eq('id', eventoId)
     .maybeSingle()
@@ -138,6 +142,7 @@ export async function cargarBorrador(
 
   return {
     id: String(f.id),
+    versionEdicion: String(f.version_edicion),
     titulo: f.titulo,
     descripcion: f.descripcion ?? '',
     categoriaId: f.categoria_id == null ? '' : String(f.categoria_id),
@@ -147,6 +152,7 @@ export async function cargarBorrador(
     tipoAcceso: f.tipo_acceso,
     tickets: tickets.map((t) => ({
       id: String(t.id),
+      versionEdicion: String(t.version_edicion),
       nombre: t.nombre,
       descripcion: t.descripcion ?? '',
       precio: String(Number(t.precio)),
