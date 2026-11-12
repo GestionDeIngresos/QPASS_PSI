@@ -16,12 +16,13 @@ import {
 type PropsPaso = {
   datos: EventoBorrador
   cambiar: (parcial: Partial<EventoBorrador>) => void
+  onSubiendo?: (subiendo: boolean) => void
 }
 
 const TITULO = 'mb-5 text-xl font-bold text-white'
 
 // ─── Paso 1: Información ─────────────────────────────────────────
-export function PasoInformacion({ datos, cambiar, categorias }: PropsPaso & { categorias: Categoria[] }) {
+export function PasoInformacion({ datos, cambiar, categorias, onSubiendo }: PropsPaso & { categorias: Categoria[] }) {
   return (
     <div>
       <h2 className={TITULO}>Paso 1: Información Básica del Evento</h2>
@@ -47,13 +48,13 @@ export function PasoInformacion({ datos, cambiar, categorias }: PropsPaso & { ca
           </option>
         ))}
       </Select>
-      <SubidaImagen etiqueta="Foto de portada" valor={datos.fotoUrl} onCambio={(url) => cambiar({ fotoUrl: url })} />
+      <SubidaImagen etiqueta="Foto de portada" valor={datos.fotoUrl} onCambio={(url) => cambiar({ fotoUrl: url })} onSubiendo={onSubiendo} />
     </div>
   )
 }
 
 // ─── Paso 2: Ubicación ───────────────────────────────────────────
-export function PasoUbicacion({ datos, cambiar }: PropsPaso) {
+export function PasoUbicacion({ datos, cambiar, onSubiendo }: PropsPaso) {
   return (
     <div>
       <h2 className={TITULO}>Paso 2: Ubicación y Distribución</h2>
@@ -64,7 +65,7 @@ export function PasoUbicacion({ datos, cambiar }: PropsPaso) {
         placeholder="Ej. Av. América esq. Pando, Cochabamba"
         onChange={(e) => cambiar({ ubicacion: e.target.value })}
       />
-      <SubidaImagen etiqueta="Foto del mapa" valor={datos.mapaUrl} onCambio={(url) => cambiar({ mapaUrl: url })} />
+      <SubidaImagen etiqueta="Foto del mapa" valor={datos.mapaUrl} onCambio={(url) => cambiar({ mapaUrl: url })} onSubiendo={onSubiendo} />
     </div>
   )
 }

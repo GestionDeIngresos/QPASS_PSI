@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 
 // Los paneles con menú lateral propio (según el mockup) no muestran el Header/Footer públicos.
 // Dev B: agrega '/organizador' aquí cuando tu layout tenga su propio menú.
-const PREFIJOS_CON_MENU_PROPIO = ['/admin', '/organizador']
+const PREFIJOS_CON_MENU_PROPIO = ['/admin', '/organizador', '/supervisor']
 
 export function OcultarEnPanel({ children }: { children: React.ReactNode }) {
   const ruta = usePathname()

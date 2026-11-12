@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 // Rutas que exigen sesión (por prefijo). /admin y /organizador ya quedan cubiertas para el Sprint 2.
-const RUTAS_PROTEGIDAS = ['/eventos', '/compra', '/mis-compras', '/admin', '/organizador', '/mi-cuenta']
+const RUTAS_PROTEGIDAS = ['/eventos', '/compra', '/mis-compras', '/admin', '/organizador', '/supervisor', '/mi-cuenta']
 // Pantallas de acceso: con sesión iniciada no tiene sentido mostrarlas.
 const RUTAS_SOLO_INVITADOS = ['/login', '/register']
 
@@ -30,11 +30,15 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Verifica la firma del JWT (JWKS local cuando el proyecto lo soporta).
+  // Los guards y las acciones siguen leyendo usuario/permisos actuales.
+  const { data, error } = await supabase.auth.getClaims()
+  const autenticado = !error && Boolean(data?.claims?.sub)
 
   const { pathname, search } = request.nextUrl
+  // Las Server Actions deben devolver su protocolo RSC, no un POST redirigido
+  // a HTML de login. Cada acción valida la sesión y sus permisos en servidor.
+  const esServerAction = request.method === 'POST' && request.headers.has('next-action')
 
   // Redirige conservando las cookies de sesión que Supabase pudo haber refrescado
   const redirigir = (destino: string, next?: string) => {
@@ -47,10 +51,10 @@ export async function middleware(request: NextRequest) {
     return respuesta
   }
 
-  if (!user && RUTAS_PROTEGIDAS.some((base) => coincide(pathname, base))) {
+  if (!autenticado && !esServerAction && RUTAS_PROTEGIDAS.some((base) => coincide(pathname, base))) {
     return redirigir('/login', pathname + search)
   }
-  if (user && RUTAS_SOLO_INVITADOS.some((base) => coincide(pathname, base))) {
+  if (autenticado && RUTAS_SOLO_INVITADOS.some((base) => coincide(pathname, base))) {
     return redirigir('/eventos')
   }
 

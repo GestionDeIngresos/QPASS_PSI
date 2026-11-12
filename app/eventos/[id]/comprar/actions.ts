@@ -28,11 +28,13 @@ function traducirError(error: {
   if (error.code === 'PGRST202' || error.code === '42883') {
     console.error('[comprarEntradas] No se encontró comprar_entradas() en Supabase:', error)
     return fallo(
-      'Falta configurar la función de compra en Supabase. Ejecuta supabase/compras_politicas_y_funcion.sql en el SQL Editor y vuelve a intentarlo.'
+      'Falta configurar las compras de prueba en Supabase. Ejecuta supabase/sprint3_devA_pagos_prueba.sql después de las migraciones de compras y vuelve a intentarlo.'
     )
   }
 
   switch (error.message.trim()) {
+    case 'SOLICITUD_REUTILIZADA':
+      return fallo('Esta solicitud ya se utilizó con otros datos. Recarga la página.')
     case 'NO_AUTH':
       return fallo('Tu sesión expiró. Inicia sesión para continuar.')
     case 'EVENTO_NO_DISPONIBLE':
@@ -66,6 +68,9 @@ function traducirError(error: {
 }
 
 export async function comprarEntradas(input: CompraInput): Promise<ResultadoCompra> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input?.solicitudId ?? '') || !['aprobado', 'rechazado', 'vencido'].includes(input?.resultadoPrueba)) {
+    return fallo('La solicitud de prueba no es válida. Recarga la página.')
+  }
   // 1) Esto llega desde el navegador: se valida la forma, no se confía en nada.
   const eventoId = typeof input?.eventoId === 'string' ? input.eventoId.trim() : ''
   const lineas = Array.isArray(input?.lineas) ? input.lineas : []
@@ -100,10 +105,12 @@ export async function comprarEntradas(input: CompraInput): Promise<ResultadoComp
   if (!user) return fallo('Tu sesión expiró. Inicia sesión para continuar.')
 
   // 3) Una sola llamada = una sola transacción.
-  const { data, error } = await supabase.rpc('comprar_entradas', {
+  const { data, error } = await supabase.rpc('comprar_entradas_prueba', {
     p_evento_id: eventoId,
     p_lineas: lineas.map((l) => ({ tipo_ticket_id: l.tipoTicketId, cantidad: l.cantidad })),
     p_correo_destino: correo || null,
+    p_solicitud_id: input.solicitudId,
+    p_resultado: input.resultadoPrueba,
   })
 
   if (error) return traducirError(error)
@@ -114,6 +121,8 @@ export async function comprarEntradas(input: CompraInput): Promise<ResultadoComp
   }
 
   const r = data as Record<string, unknown>
+  if (r.error === 'PAGO_PRUEBA_RECHAZADO') return fallo('Prueba: pago rechazado. No se generaron entradas ni se descontó cupo.')
+  if (r.error === 'PAGO_PRUEBA_VENCIDO') return fallo('Prueba: pago vencido. No se generaron entradas ni se descontó cupo.')
   const compraId =
     typeof r.compra_id === 'string' || typeof r.compra_id === 'number' ? String(r.compra_id) : ''
   const entradas = Number(r.entradas)

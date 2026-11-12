@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { obtenerSesionActual } from '@/lib/auth/sesion'
 import { AccionesCuenta } from '@/components/AccionesCuenta'
 
 const NAV = [
@@ -8,15 +8,9 @@ const NAV = [
 ]
 
 export async function Header() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // Perfil para el menú "Mi Cuenta" (RLS: cada usuario lee su propia fila)
-  const { data: perfil } = user
-    ? await supabase.from('usuarios').select('nombre, correo, rol').eq('id', user.id).maybeSingle()
-    : { data: null }
+  const sesion = await obtenerSesionActual()
+  const user = sesion?.user
+  const perfil = sesion?.perfil
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border bg-card px-6 py-4 md:px-10">

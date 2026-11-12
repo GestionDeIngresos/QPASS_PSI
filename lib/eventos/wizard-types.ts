@@ -13,6 +13,7 @@ export type AccionFinal = 'guardar' | 'publicar'
 /** Los números van como texto porque vienen de <input>; se convierten al guardar */
 export type TicketBorrador = {
   id?: string // solo si ya existe en la BD
+  versionEdicion?: string
   nombre: string
   descripcion: string
   precio: string
@@ -22,6 +23,7 @@ export type TicketBorrador = {
 
 export type EventoBorrador = {
   id?: string // solo si ya existe en la BD
+  versionEdicion?: string
   // Paso 1
   titulo: string
   descripcion: string

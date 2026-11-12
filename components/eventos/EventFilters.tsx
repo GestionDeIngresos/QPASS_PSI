@@ -1,3 +1,4 @@
+import Form from 'next/form'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -5,9 +6,9 @@ import { Select } from '@/components/ui/Select'
 import type { Categoria, FiltrosEventos } from '@/lib/eventos/types'
 
 /**
- * Filtros de búsqueda. Es un <form method="get">: al enviarlo, el navegador
- * navega a /eventos?q=...&categoria=...&fecha=... y la página (server component)
- * vuelve a consultar Supabase. No necesita JavaScript en el cliente.
+ * Filtros de búsqueda. Es un <Form>: al enviarlo, el navegador
+ * navega sin recargar el documento a /eventos?q=...&categoria=...&fecha=...
+ * y vuelve a consultar Supabase. Conserva el envío nativo si no hay JavaScript.
  */
 export function EventFilters({
   categorias,
@@ -19,9 +20,8 @@ export function EventFilters({
   const hayFiltros = Boolean(valores.q || valores.categoriaId || valores.fecha)
 
   return (
-    <form
+    <Form
       action="/eventos"
-      method="get"
       className="rounded-2xl border border-border bg-card p-5 shadow-[0_0_40px_rgba(255,0,122,0.08)] md:p-6"
     >
       <div className="grid gap-x-4 md:grid-cols-2 lg:grid-cols-[2fr_1.3fr_1fr_auto]">
@@ -60,6 +60,6 @@ export function EventFilters({
           )}
         </div>
       </div>
-    </form>
+    </Form>
   )
 }

@@ -70,7 +70,9 @@ export async function generarComprobantePdf(c: CompraConEntradas) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const w = doc.internal.pageSize.getWidth();
 
-  cabecera(doc, "Comprobante de compra");
+  cabecera(doc, "Comprobante de prueba");
+  doc.setFontSize(9);
+  doc.text("SIMULACION - Sin movimiento de dinero real", 14, 32);
 
   doc.setTextColor(20, 20, 30);
   doc.setFont("helvetica", "bold");

@@ -3,18 +3,15 @@
 // Solo el rol organizador accede al panel y a sus server actions.
 // ════════════════════════════════════════════════════════════════
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { obtenerSesionActual } from '@/lib/auth/sesion'
 
 export type PerfilOrganizador = { nombre: string; rol: string }
 
 /** Para server actions: { supabase, user } o null si no hay sesión */
 async function leerSesion() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return null
-  const { data: perfil } = await supabase.from('usuarios').select('rol').eq('id', user.id).maybeSingle()
+  const sesion = await obtenerSesionActual()
+  if (!sesion) return null
+  const { supabase, user, perfil } = sesion
   return { supabase, user, rol: perfil?.rol }
 }
 
@@ -33,10 +30,10 @@ export async function exigirSesion(volverA = '/organizador/eventos') {
 
 /** Nombre y rol para la barra superior (si falla la lectura, se usa el correo) */
 export async function obtenerPerfil(
-  supabase: NonNullable<Awaited<ReturnType<typeof obtenerSesion>>>['supabase'],
+  _supabase: NonNullable<Awaited<ReturnType<typeof obtenerSesion>>>['supabase'],
   user: { id: string; email?: string | null }
 ): Promise<PerfilOrganizador> {
-  const { data } = await supabase.from('usuarios').select('nombre, rol').eq('id', user.id).maybeSingle()
-  const perfil = data as { nombre: string | null; rol: string | null } | null
+  const sesion = await obtenerSesionActual()
+  const perfil = sesion?.user.id === user.id ? sesion.perfil : null
   return { nombre: perfil?.nombre ?? user.email ?? 'Usuario', rol: perfil?.rol ?? 'cliente' }
 }

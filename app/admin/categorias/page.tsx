@@ -1,3 +1,4 @@
+import Form from 'next/form'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { BotonConfirmar } from '@/components/admin/BotonConfirmar'
@@ -24,7 +25,7 @@ const campo =
 
 function Formulario({ cat }: { cat: CategoriaAdmin | null }) {
   return (
-    <form action={cat ? editarCategoria : crearCategoria} className="mb-5 rounded-2xl border border-pink/40 bg-card p-5">
+    <Form action={cat ? editarCategoria : crearCategoria} className="mb-5 rounded-2xl border border-pink/40 bg-card p-5">
       <h2 className="mb-4 font-bold text-white">{cat ? `Editar "${cat.nombre}"` : 'Nueva categoría'}</h2>
       {cat && <input type="hidden" name="id" value={cat.id} />}
       <div className="grid gap-4 md:grid-cols-[1fr_2fr_10rem]">
@@ -52,7 +53,7 @@ function Formulario({ cat }: { cat: CategoriaAdmin | null }) {
           Cancelar
         </Link>
       </div>
-    </form>
+    </Form>
   )
 }
 
@@ -75,7 +76,7 @@ export default async function CategoriasPage({
     <div className="mx-auto w-full max-w-5xl">
       <h1 className="mb-6 text-3xl font-extrabold text-white">Gestión de Categorías</h1>
 
-      <form action="/admin/categorias" method="get" className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-3">
+      <Form action="/admin/categorias" className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-3">
         <input name="q" type="search" defaultValue={q} maxLength={80} placeholder="Buscar por nombre de categoría..." className={`${campo} min-w-48 flex-1`} />
         <select name="estado" defaultValue={estado} className={`${campo} w-auto`} aria-label="Filtrar por estado">
           <option value="todos">Estado: Todos</option>
@@ -88,7 +89,7 @@ export default async function CategoriasPage({
         <Link href="/admin/categorias?nuevo=1" className="rounded-lg bg-pink px-4 py-2.5 text-sm font-bold text-white transition hover:bg-pink-hover">
           + Crear Categoría
         </Link>
-      </form>
+      </Form>
 
       {ERRORES[un(p.error)] && (
         <p role="alert" className="mb-4 rounded-lg border border-pink/50 bg-pink/10 px-4 py-3 text-sm text-pink">
@@ -124,7 +125,7 @@ export default async function CategoriasPage({
                   <td className="px-3 py-3 font-bold text-white">{c.nombre}</td>
                   <td className="px-3 py-3 text-muted">{c.descripcion ?? '—'}</td>
                   <td className="px-3 py-3">
-                    <form action={alternarCategoria}>
+                    <Form action={alternarCategoria}>
                       <input type="hidden" name="id" value={c.id} />
                       <input type="hidden" name="activar" value={String(!c.activa)} />
                       <button
@@ -136,19 +137,19 @@ export default async function CategoriasPage({
                       >
                         {c.activa ? 'Activo' : 'Inactivo'}
                       </button>
-                    </form>
+                    </Form>
                   </td>
                   <td className="px-3 py-3">
                     <div className="flex justify-end gap-2">
                       <Link href={`/admin/categorias?editar=${c.id}`} className="rounded-md border border-border bg-bg px-3 py-1.5 text-xs font-bold text-white transition hover:border-pink">
                         Editar
                       </Link>
-                      <form action={eliminarCategoria}>
+                      <Form action={eliminarCategoria}>
                         <input type="hidden" name="id" value={c.id} />
                         <BotonConfirmar mensaje={`¿Eliminar la categoría "${c.nombre}"?`} className="rounded-md bg-red-700 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-red-600">
                           Eliminar
                         </BotonConfirmar>
-                      </form>
+                      </Form>
                     </div>
                   </td>
                 </tr>

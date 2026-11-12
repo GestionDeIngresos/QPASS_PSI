@@ -15,7 +15,7 @@ export function TicketCard({ entrada, proximo, onVerQr }: Props) {
   const { evento } = entrada;
   const esDigital = evento.tipo_acceso === "qr_digital";
   // El QR digital se muestra en la app; el físico (manilla) se entrega en el evento.
-  const puedeVerQr = esDigital && (entrada.estado === "activa" || entrada.estado === "usada");
+  const puedeVerQr = entrada.estado === "activa" || entrada.estado === "usada";
 
   return (
     <li className="flex flex-col gap-4 rounded-xl border border-[#231B45] bg-[#16112E] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
@@ -36,6 +36,7 @@ export function TicketCard({ entrada, proximo, onVerQr }: Props) {
           <p className={`mt-1 text-[11px] font-semibold ${esDigital ? "text-[#00F0FF]" : "text-[#FF007A]"}`}>
             {entrada.tipo_ticket.nombre} · Tipo {etiquetaAcceso(evento.tipo_acceso)}
           </p>
+          {!esDigital && <div className="mt-3"><label className="block text-xs text-muted">Código de recogida de manilla<input aria-label="Código de recogida de manilla" readOnly value={entrada.codigo_qr} onFocus={e => e.target.select()} className="mt-1 w-full rounded border border-border bg-bg px-2 py-1 font-mono text-xs text-white"/></label></div>}
         </div>
       </div>
 
@@ -45,7 +46,7 @@ export function TicketCard({ entrada, proximo, onVerQr }: Props) {
           onClick={onVerQr}
           className="w-full rounded-lg border border-[#FF007A]/50 bg-[#FF007A]/10 px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-[#FF007A] transition hover:bg-[#FF007A] hover:text-white sm:w-auto"
         >
-          Ver QR
+          {esDigital ? 'Ver QR' : 'QR de recogida'}
         </button>
       )}
     </li>

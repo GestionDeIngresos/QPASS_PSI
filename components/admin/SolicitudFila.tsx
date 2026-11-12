@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 import { BotonConfirmar } from '@/components/admin/BotonConfirmar'
 import { eliminarSolicitud, resolverSolicitud } from '@/app/admin/solicitudes/actions'
 import { formatearRangoCorto, type SolicitudAdmin } from '@/lib/admin/solicitudes'
@@ -35,9 +36,9 @@ export function SolicitudFila({ s }: { s: SolicitudAdmin }) {
           <>
             <form action={resolverSolicitud}>
               <input type="hidden" name="id" value={s.id} />
-              <button name="decision" value="aprobar" className={`${BOTON} bg-green-400 text-black hover:bg-green-300`}>
+              <SubmitButton name="decision" value="aprobar" pendingText="Aceptando…" className={`${BOTON} bg-green-400 text-black hover:bg-green-300`}>
                 Aceptar
-              </button>
+              </SubmitButton>
             </form>
             <form action={resolverSolicitud}>
               <input type="hidden" name="id" value={s.id} />

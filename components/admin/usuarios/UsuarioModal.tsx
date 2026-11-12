@@ -80,7 +80,6 @@ export function UsuarioModal({ modo, inicial, nombreActual, eventos, accion, cer
       const r = await accion({ ...datos, eventoId: conEvento ? datos.eventoId : null })
       if (!r.ok) return setError(r.error)
       router.push(cerrarHref)
-      router.refresh()
     })
   }
 
