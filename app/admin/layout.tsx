@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { AdminNav } from '@/components/admin/AdminNav'
-import { CerrarSesionButton } from '@/components/CerrarSesionButton'
+import { AccionesCuenta } from '@/components/AccionesCuenta'
 import { exigirAdmin } from '@/lib/admin/auth'
 
 function Logo({ className = '' }: { className?: string }) {
@@ -14,7 +14,7 @@ function Logo({ className = '' }: { className?: string }) {
 
 // Layout del panel Admin: menú lateral + barra superior. El guard de rol corre aquí, en el servidor.
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { perfil } = await exigirAdmin()
+  const { perfil, user } = await exigirAdmin()
 
   return (
     <div className="flex min-h-screen bg-bg">
@@ -24,14 +24,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex items-center justify-between gap-4 border-b border-border bg-card/60 px-6 py-4 md:px-10">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border bg-card/60 px-6 py-4 md:px-10">
           <Logo className="lg:invisible" />
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <div className="text-right leading-tight">
               <p className="text-sm font-semibold text-white">{perfil.nombre}</p>
               <p className="text-xs font-semibold text-pink">Rol: Admin</p>
             </div>
-            <CerrarSesionButton />
+            <AccionesCuenta perfil={{ ...perfil, correo: user.email ?? '' }} />
           </div>
         </div>
 
