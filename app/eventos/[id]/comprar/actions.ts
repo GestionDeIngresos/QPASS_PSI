@@ -28,7 +28,7 @@ function traducirError(error: {
   if (error.code === 'PGRST202' || error.code === '42883') {
     console.error('[comprarEntradas] No se encontró comprar_entradas() en Supabase:', error)
     return fallo(
-      'Falta configurar las compras de prueba en Supabase. Ejecuta supabase/sprint3_devA_pagos_prueba.sql después de las migraciones de compras y vuelve a intentarlo.'
+      'Las compras de prueba no están disponibles en este momento. Contacta al administrador.'
     )
   }
 
@@ -37,6 +37,8 @@ function traducirError(error: {
       return fallo('Esta solicitud ya se utilizó con otros datos. Recarga la página.')
     case 'NO_AUTH':
       return fallo('Tu sesión expiró. Inicia sesión para continuar.')
+    case 'CUENTA_INACTIVA':
+      return fallo('Tu cuenta no está habilitada para comprar.')
     case 'EVENTO_NO_DISPONIBLE':
       return fallo('Este evento ya no está disponible para la venta.')
     case 'LINEAS_INVALIDAS':
@@ -55,10 +57,15 @@ function traducirError(error: {
     case 'CORREO_INVALIDO':
       return fallo('Ingresa un correo válido.', 'correo')
     case 'DESTINATARIO_NO_REGISTRADO':
+    case 'DESTINATARIO_NO_VALIDO':
       return fallo(
-        'Ese correo no está registrado en QPass. Pídele a la persona que cree su cuenta y vuelve a intentarlo.',
+        'No se puede asignar la entrada a ese correo. La persona debe tener una cuenta registrada y activa.',
         'correo'
       )
+    case 'DESTINATARIO_NO_COINCIDE':
+      return fallo('No se pudo verificar el destinatario. La compra no se realizó; contacta al administrador.', 'correo')
+    case 'COMPRA_INCONSISTENTE':
+      return fallo('No se pudo verificar la compra. La operación se canceló; contacta al administrador.')
     case 'DESTINATARIO_ES_COMPRADOR':
       return fallo('Ese es tu propio correo. Desactiva "Para otra persona" para comprar para ti.', 'correo')
     default:
@@ -96,6 +103,9 @@ export async function comprarEntradas(input: CompraInput): Promise<ResultadoComp
   if (input.correoDestino !== null && !correo) {
     return fallo('Ingresa el correo de la persona destinataria.', 'correo')
   }
+  if (correo && (correo.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo))) {
+    return fallo('Ingresa un correo válido.', 'correo')
+  }
 
   // 2) Sesión: comprador_id lo decide Postgres con auth.uid(), nunca el cliente.
   const supabase = await createClient()
@@ -103,9 +113,11 @@ export async function comprarEntradas(input: CompraInput): Promise<ResultadoComp
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return fallo('Tu sesión expiró. Inicia sesión para continuar.')
+  const { data: perfil, error: errorPerfil } = await supabase.from('usuarios').select('activo').eq('id', user.id).maybeSingle()
+  if (errorPerfil || perfil?.activo !== true) return fallo('Tu cuenta no está habilitada para comprar.')
 
   // 3) Una sola llamada = una sola transacción.
-  const { data, error } = await supabase.rpc('comprar_entradas_prueba', {
+  const { data, error } = await supabase.rpc('comprar_entradas_terceros_prueba', {
     p_evento_id: eventoId,
     p_lineas: lineas.map((l) => ({ tipo_ticket_id: l.tipoTicketId, cantidad: l.cantidad })),
     p_correo_destino: correo || null,

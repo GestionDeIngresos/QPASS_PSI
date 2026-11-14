@@ -126,11 +126,13 @@ export async function generarComprobantePdf(c: CompraConEntradas) {
   doc.text(formatFechaCompra(c.creado_en), 14, 51);
   doc.text(`Estado del pago: ${c.estado_pago}`, 14, 57);
 
-  let y = 72;
+  doc.setFontSize(9);
+  doc.text(doc.splitTextToSize("Precios unitarios históricos no disponibles. Totales registrados en la compra.", w - 28), 14, 65);
+  let y = 82;
   doc.setTextColor(20, 20, 30);
   doc.setFont("helvetica", "bold");
   doc.text("Detalle", 14, y);
-  doc.text("Precio", w - 14, y, { align: "right" });
+  doc.text("Precio histórico", w - 14, y, { align: "right" });
   doc.setDrawColor(...GRIS);
   doc.line(14, y + 2, w - 14, y + 2);
   y += 10;
@@ -138,7 +140,7 @@ export async function generarComprobantePdf(c: CompraConEntradas) {
   doc.setFont("helvetica", "normal");
   for (const e of c.entradas) {
     doc.text(doc.splitTextToSize(`${e.evento.titulo} — ${e.tipo_ticket.nombre}`, w - 60), 14, y);
-    doc.text(formatMoney(e.tipo_ticket.precio), w - 14, y, { align: "right" });
+    doc.text("No disponible", w - 14, y, { align: "right" });
     y += 8;
   }
 

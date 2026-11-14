@@ -1,14 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { EntradaConEvento } from "../../types/compras";
-import { esProximo } from "../../lib/compras/format";
+import Link from 'next/link';
+import type { CompraPagada, EntradaConEvento } from "../../types/compras";
+import { esProximo, formatFechaCompra, formatMoney, numeroCompra } from "../../lib/compras/format";
 import { TicketCard } from "./TicketCard";
 import { QrModal } from "./QrModal";
 
 type Tab = "proximos" | "historial";
 
-export function MisComprasView({ entradas }: { entradas: EntradaConEvento[] }) {
+export function MisComprasView({ entradas, compras = [] }: { entradas: EntradaConEvento[]; compras?: CompraPagada[] }) {
   const [tab, setTab] = useState<Tab>("proximos");
   const [seleccionada, setSeleccionada] = useState<EntradaConEvento | null>(null);
 
@@ -43,7 +44,7 @@ export function MisComprasView({ entradas }: { entradas: EntradaConEvento[] }) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold text-white">Mis Compras</h1>
-          <p className="mt-1 text-sm text-[#A29DB8]">Gestiona tus pases y accede a los códigos de entrada para tus próximos eventos</p>
+          <p className="mt-1 text-sm text-[#A29DB8]">Consulta tus entradas y las compras que pagaste, incluidas las realizadas para otras personas.</p>
         </div>
         <div role="tablist" className="inline-flex self-start rounded-lg border border-[#231B45] bg-[#16112E] p-1 sm:self-auto">
           {tabBtn("proximos", "Próximos", proximos.length)}
@@ -51,6 +52,7 @@ export function MisComprasView({ entradas }: { entradas: EntradaConEvento[] }) {
         </div>
       </div>
 
+      <h2 className="mt-8 text-xl font-bold text-white">Entradas que te pertenecen</h2>
       {lista.length === 0 ? (
         <div className="mt-10 rounded-xl border border-dashed border-[#231B45] p-10 text-center text-sm text-[#A29DB8]">
           {tab === "proximos" ? "No tienes entradas para próximos eventos." : "Aún no tienes compras en el historial."}
@@ -64,6 +66,16 @@ export function MisComprasView({ entradas }: { entradas: EntradaConEvento[] }) {
       )}
 
       {seleccionada && <QrModal entrada={seleccionada} onClose={() => setSeleccionada(null)} />}
+      <section className="mt-10 space-y-4">
+        <h2 className="text-xl font-bold text-white">Compras que pagaste</h2>
+        <p className="text-sm text-muted">Conservas el comprobante. Si compraste para otra persona, sus entradas y QR están en su cuenta.</p>
+        {compras.length === 0 ? <p className="text-sm text-muted">No tienes compras registradas.</p> : <ul className="space-y-3">
+          {compras.map(c => <li key={c.id} className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div><p className="font-bold">Compra {numeroCompra(c.id)}</p><p className="text-xs text-muted">{formatFechaCompra(c.creado_en)} · {c.estado_pago}</p><p className="mt-1 font-semibold text-cyan">{formatMoney(c.total)}</p></div>
+            <Link href={`/compra/confirmacion/${encodeURIComponent(c.id)}`} className="text-sm font-bold text-pink hover:underline">Ver detalle y comprobante</Link>
+          </li>)}
+        </ul>}
+      </section>
     </>
   );
 }

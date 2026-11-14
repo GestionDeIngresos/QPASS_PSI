@@ -36,5 +36,12 @@ export interface CompraConEntradas {
   estado_pago: string;
   comprobante_url: string | null;
   creado_en: string;
-  entradas: EntradaConEvento[];
+  /** Resumen de compra: nunca contiene códigos QR de destinatarios. */
+  entradas: (Omit<EntradaConEvento, 'codigo_qr' | 'tipo_ticket'> & {
+    /** null: no existe evidencia de un precio unitario histórico. */
+    tipo_ticket: Omit<TipoTicketResumen, 'precio'> & { precio: number | null };
+  })[];
+  para_terceros?: boolean;
 }
+
+export type CompraPagada = Omit<CompraConEntradas, 'entradas' | 'para_terceros'>;
