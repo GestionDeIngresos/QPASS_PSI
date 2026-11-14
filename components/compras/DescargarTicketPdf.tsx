@@ -28,7 +28,7 @@ export function DescargarTicketPdf({ entrada, className = "" }: { entrada: Entra
         disabled={cargando}
         className={`w-full rounded-lg bg-[#FF007A] px-4 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-[0_0_24px_-6px_#FF007A] transition hover:brightness-110 disabled:opacity-60 ${className}`}
       >
-        {cargando ? "Generando PDF…" : "Descargar ticket PDF"}
+        {cargando ? "Generando PDF…" : entrada.evento.tipo_acceso === 'qr_fisico' ? 'Descargar PDF de recogida' : 'Descargar entrada PDF'}
       </button>
       {error && <p role="alert" className="mt-2 text-center text-xs text-[#FF3B30]">{error}</p>}
     </div>

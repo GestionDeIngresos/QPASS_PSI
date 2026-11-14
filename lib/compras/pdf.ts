@@ -1,5 +1,6 @@
 import type { CompraConEntradas, EntradaConEvento } from "../../types/compras";
-import { formatFechaCompra, formatFechaEvento, formatMoney, numeroCompra } from "./format";
+import { formatFechaCompra, formatMoney, numeroCompra } from "./format";
+import { formatearFecha } from "../eventos/format";
 
 // jsPDF y qrcode se importan dinámicamente: solo se descargan al pulsar el botón.
 const ROSA: [number, number, number] = [255, 0, 122];
@@ -27,41 +28,82 @@ function guardar(doc: import("jspdf").jsPDF, nombre: string) {
 
 /** Ticket individual con QR (fondo blanco para que el QR escanee bien al imprimirse). */
 export async function generarTicketPdf(e: EntradaConEvento) {
+  if (!e.codigo_qr?.trim() || !['qr_digital', 'qr_fisico'].includes(e.evento.tipo_acceso)) {
+    throw new Error('La entrada no tiene un QR o tipo de acceso válido.');
+  }
   const [{ jsPDF }, QRCode] = await Promise.all([import("jspdf"), import("qrcode")]);
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const w = doc.internal.pageSize.getWidth();
+  const margen = 14;
+  const limite = doc.internal.pageSize.getHeight() - margen;
+  const ancho = w - margen * 2;
+  const fisico = e.evento.tipo_acceso === 'qr_fisico';
+  const titulo = fisico ? 'Recogida de manilla' : 'Entrada digital';
+  let y = 42;
 
-  cabecera(doc, "Entrada de acceso");
+  cabecera(doc, titulo);
 
-  doc.setTextColor(20, 20, 30);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.text(doc.splitTextToSize(e.evento.titulo, w - 28), 14, 46);
+  function nuevaPagina() {
+    doc.addPage();
+    cabecera(doc, titulo);
+    y = 42;
+  }
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-  doc.setTextColor(...GRIS);
-  doc.text(formatFechaEvento(e.evento.fecha_evento), 14, 62);
-  if (e.evento.ubicacion) doc.text(e.evento.ubicacion, 14, 69);
+  // Se dibuja línea a línea para conservar todo el texto sin posiciones fijas.
+  function escribir(texto: string, tamano: number, negrita = false) {
+    const interlineado = tamano * 0.3528 * 1.3;
+    doc.setFont('helvetica', negrita ? 'bold' : 'normal');
+    doc.setFontSize(tamano);
+    const lineas: string[] = doc.splitTextToSize(texto, ancho);
+    for (const linea of lineas) {
+      if (y + interlineado > limite) nuevaPagina();
+      doc.setFont('helvetica', negrita ? 'bold' : 'normal');
+      doc.setFontSize(tamano);
+      doc.setTextColor(20, 20, 30);
+      doc.text(linea, margen, y);
+      y += interlineado;
+    }
+    y += 4;
+  }
 
-  doc.setTextColor(20, 20, 30);
-  doc.setFont("helvetica", "bold");
-  doc.text(e.tipo_ticket.nombre, 14, 82);
+  escribir(e.evento.titulo, 20, true);
+  escribir(`Fecha: ${formatearFecha(e.evento.fecha_evento, { conAnio: true, conHora: true })} (hora de Bolivia)`, 11);
+  escribir(`Ubicación: ${e.evento.ubicacion?.trim() || 'Por confirmar'}`, 11);
+  escribir(`Tipo de entrada: ${e.tipo_ticket.nombre}`, 12, true);
 
-  const qr = await QRCode.toDataURL(e.codigo_qr, { margin: 1, width: 600, errorCorrectionLevel: "M" });
+  const instrucciones = fisico
+    ? 'QR de recogida: presenta este código y tu carnet al administrador para recoger y vincular tu manilla física. Este PDF no sustituye la manilla necesaria para ingresar. No compartas este código.'
+    : 'Presenta este código QR en el acceso al evento. No lo compartas: cada entrada permite un solo ingreso y está sujeta a validación.';
+  doc.setFont('courier', 'normal');
+  doc.setFontSize(9);
+  const lineasCodigo: string[] = doc.splitTextToSize(e.codigo_qr, ancho);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  const lineasInstrucciones: string[] = doc.splitTextToSize(instrucciones, ancho);
+  // Mantener juntos el QR completo, su código y las instrucciones.
+  const altoBloque = 16 + 90 + 6 + lineasCodigo.length * 4.2 + 5 + lineasInstrucciones.length * 4.6;
+  if (y + altoBloque > limite) nuevaPagina();
+  escribir(fisico ? 'QR de recogida de manilla' : 'QR de acceso digital', 12, true);
+
+  const qr = await QRCode.toDataURL(e.codigo_qr, {
+    margin: 4, width: 600, errorCorrectionLevel: 'M',
+    color: { dark: '#000000ff', light: '#ffffffff' },
+  });
   const lado = 90;
-  doc.addImage(qr, "PNG", (w - lado) / 2, 95, lado, lado);
+  doc.addImage(qr, "PNG", (w - lado) / 2, y, lado, lado);
+  y += lado + 6;
 
   doc.setFont("courier", "normal");
-  doc.setFontSize(11);
-  doc.setTextColor(...GRIS);
-  doc.text(e.codigo_qr, w / 2, 95 + lado + 8, { align: "center" });
-
-  doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text("Presenta este código QR en el acceso. No lo compartas: cada entrada es de un solo uso.", w / 2, 290, { align: "center" });
+  doc.setTextColor(...GRIS);
+  for (const linea of lineasCodigo) {
+    doc.text(linea, w / 2, y, { align: 'center' });
+    y += 4.2;
+  }
+  y += 5;
+  escribir(instrucciones, 10);
 
-  guardar(doc, `ticket-${e.evento.titulo}-${e.id.slice(0, 6)}.pdf`);
+  guardar(doc, `ticket-${fisico ? 'recogida' : 'digital'}-${e.evento.titulo.slice(0, 80)}-${e.id}.pdf`);
 }
 
 /** Comprobante de compra (se usa si la compra no tiene comprobante_url). */
