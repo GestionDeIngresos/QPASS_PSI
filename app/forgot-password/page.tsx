@@ -16,26 +16,49 @@ export default function ForgotPasswordPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (loading) return
+    const correo = email.trim()
+    if (correo.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+      setError('Ingresa un correo electrónico válido.')
+      return
+    }
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    })
-
-    setLoading(false)
-    if (error) return setError('No pudimos enviar el enlace. Verifica el correo.')
-    setSent(true)
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(correo, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+      if (error) {
+        // Los errores de cuenta tampoco deben permitir enumerar correos.
+        if (error.status === 429 || error.code === 'over_email_send_rate_limit' || error.code === 'over_request_rate_limit') {
+          setError('Espera unos minutos antes de solicitar otro enlace.')
+        } else if (error.status === 0 || (error.status !== undefined && error.status >= 500) || error.name === 'AuthRetryableFetchError') {
+          setError('No pudimos enviar la solicitud. Inténtalo de nuevo en unos minutos.')
+        } else {
+          setSent(true)
+        }
+        return
+      }
+      setSent(true)
+    } catch {
+      setError('No pudimos conectar. Revisa tu conexión e inténtalo de nuevo.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <AuthCard title="Recuperar clave" subtitle="Te enviaremos un enlace para restablecer tu contraseña.">
       {sent ? (
-        <p className="text-center text-sm text-muted">Si el correo está registrado, te llegará un enlace en unos minutos.</p>
+        <div role="status" className="space-y-3 text-center text-sm text-muted">
+          <p>Si el correo está registrado, te llegará un enlace en unos minutos. Revisa también la carpeta de spam.</p>
+          <p>Abre el enlace en este mismo navegador y dispositivo.</p>
+        </div>
       ) : (
         <form onSubmit={handleSubmit}>
-          <Input label="Email registrado" type="email" placeholder="ejemplo@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
+          <Input label="Email registrado" aria-label="Email registrado" type="email" autoComplete="email" maxLength={254} disabled={loading} placeholder="ejemplo@correo.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          {error && <p role="alert" className="mb-4 text-sm text-red-400">{error}</p>}
           <Button type="submit" disabled={loading}>
             {loading ? 'Enviando...' : 'Enviar enlace de recuperación'}
           </Button>
