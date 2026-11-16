@@ -44,14 +44,20 @@ const pantallas = [
   ['/ayudante/ventas/nueva', 'app/ayudante/ventas/nueva/page.tsx'],
   ['/ayudante/historial', 'app/ayudante/historial/page.tsx'],
 ]
-async function vista(archivo, contexto) {
+async function vista(archivo, contexto, datosCatalogo = { estado: 'pendiente' }, estadoCarrito) {
+  const carrito = cargar('components/ayudante/CatalogoCarrito.tsx', {
+    react: estadoCarrito ? { useState: inicial => [typeof inicial === 'object' ? estadoCarrito : inicial, () => {}] } : React, 'react/jsx-runtime': jsx,
+    '@/lib/ayudante/carrito': cargar('lib/ayudante/carrito.ts'),
+  });
   return cargar(archivo, {
     'react/jsx-runtime': jsx, 'next/link': { default: Link },
     '@/lib/ayudante/auth': { obtenerContextoAyudante: async () => contexto },
     '@/components/ayudante/EstadoAsignacion': { EstadoAsignacion },
-  }).default()
+    '@/components/ayudante/CatalogoCarrito': carrito,
+    '@/lib/ayudante/catalogo-server': { obtenerCatalogoAyudante: async () => datosCatalogo },
+  }).default({ searchParams: Promise.resolve({}) })
 }
-async function fixtures() {
+async function fixtures(incluirCarritos = false) {
   const contexto = { sesion: base, asignacion: { estado: 'asignado', eventoId: 7 } }
   const cerrar = cargar('components/CerrarSesionButton.tsx', {
     react: React, 'react/jsx-runtime': jsx, 'next/navigation': { useRouter: () => ({}) },
@@ -60,14 +66,23 @@ async function fixtures() {
   const menu = cargar('components/MenuCuenta.tsx', { react: React, 'react/jsx-runtime': jsx, 'next/link': { default: Link }, '@/components/CerrarSesionButton': cerrar })
   const cuenta = cargar('components/AccionesCuenta.tsx', { 'react/jsx-runtime': jsx, '@/components/MenuCuenta': menu, '@/components/CerrarSesionButton': cerrar })
   const paginas = new Map()
-  for (const [ruta, archivo] of pantallas) {
-    const nav = cargar('components/ayudante/AyudanteNav.tsx', { 'react/jsx-runtime': jsx, 'next/link': { default: Link }, 'next/navigation': { usePathname: () => ruta } })
+  const escenarios = [...pantallas.map(([ruta, archivo]) => ({ ruta, archivo }))]
+  if (incluirCarritos) {
+    const demo = cargar('lib/ayudante/demo/catalogo.ts', { 'server-only': {} })
+    const datosCatalogo = { estado: 'disponible', modo: 'demostracion', catalogo: demo.crearCatalogoDemostracion(7) }
+    escenarios.push({ ruta: '/ayudante/ventas/nueva?fixture=bebidas', archivo: pantallas[1][1], datosCatalogo,
+      estadoCarrito: { negocioId: 'demo-bebidas', lineas: [{ productoId: 'demo-agua', cantidad: 2 }, { productoId: 'demo-jugo', cantidad: 1 }] } })
+    escenarios.push({ ruta: '/ayudante/ventas/nueva?fixture=comida', archivo: pantallas[1][1], datosCatalogo,
+      estadoCarrito: { negocioId: 'demo-comida', lineas: [{ productoId: 'demo-bocadillo', cantidad: 3 }] } })
+  }
+  for (const { ruta, archivo, datosCatalogo, estadoCarrito } of escenarios) {
+    const nav = cargar('components/ayudante/AyudanteNav.tsx', { 'react/jsx-runtime': jsx, 'next/link': { default: Link }, 'next/navigation': { usePathname: () => ruta.split('?')[0] } })
     const layout = cargar('app/ayudante/layout.tsx', {
       'react/jsx-runtime': jsx, 'next/link': { default: Link },
       '@/lib/ayudante/auth': { exigirAyudante: async () => base },
       '@/components/AccionesCuenta': cuenta, '@/components/ayudante/AyudanteNav': nav,
     })
-    const html = renderToStaticMarkup(await layout.default({ children: await vista(archivo, contexto) }))
+    const html = renderToStaticMarkup(await layout.default({ children: await vista(archivo, contexto, datosCatalogo, estadoCarrito) }))
     paginas.set(ruta, html)
   }
   return paginas
@@ -152,7 +167,7 @@ async function verificarNavegador() {
   const os = require('node:os'), http = require('node:http'), { spawn } = require('node:child_process')
   const navegador = process.env.QPASS_BROWSER_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
   assert.ok(fs.existsSync(navegador), 'Indica un navegador Chromium instalado mediante QPASS_BROWSER_PATH')
-  const paginas = await fixtures()
+  const paginas = await fixtures(true)
   const cssDir = path.resolve('.next/static/chunks')
   const css = fs.readdirSync(cssDir).filter(n => n.endsWith('.css')).map(n => fs.readFileSync(path.join(cssDir, n), 'utf8')).join('\n')
   assert.ok(css.length > 0, 'Ejecutar build antes de probar el diseño')
@@ -190,7 +205,7 @@ async function verificarNavegador() {
       pendientes.set(id, { resolve, reject, timer }); ws.send(JSON.stringify({ id, method, params }))
     })
     await enviar('Page.enable')
-    for (const width of [390, 1280]) for (const [ruta] of pantallas) {
+    for (const width of [390, 1280]) for (const [ruta] of paginas) {
       await enviar('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: width < 600 })
       await enviar('Page.navigate', { url: `http://127.0.0.1:${server.address().port}${ruta}` })
       await enviar('Runtime.evaluate', { expression: "new Promise(r => { if(document.readyState==='complete') r(); else window.addEventListener('load',r,{once:true}); }).then(()=>document.fonts.ready)", awaitPromise: true })
