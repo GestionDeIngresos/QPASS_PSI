@@ -45,6 +45,9 @@ const pantallas = [
   ['/ayudante/historial', 'app/ayudante/historial/page.tsx'],
 ]
 async function vista(archivo, contexto, datosCatalogo = { estado: 'pendiente' }, estadoCarrito) {
+  const modeloVentas = cargar('lib/ayudante/ventas-model.ts')
+  const ResumenVentas = cargar('components/ayudante/ResumenVentas.tsx', { 'react/jsx-runtime': jsx }).ResumenVentas
+  const HistorialVentas = cargar('components/ayudante/HistorialVentas.tsx', { 'react/jsx-runtime': jsx, 'next/link': { default: Link }, '@/lib/ayudante/ventas-model': modeloVentas }).HistorialVentas
   const carrito = cargar('components/ayudante/CatalogoCarrito.tsx', {
     react: estadoCarrito ? { useState: inicial => [typeof inicial === 'object' ? estadoCarrito : inicial, () => {}] } : React, 'react/jsx-runtime': jsx,
     '@/lib/ayudante/carrito': cargar('lib/ayudante/carrito.ts'),
@@ -55,6 +58,10 @@ async function vista(archivo, contexto, datosCatalogo = { estado: 'pendiente' },
     '@/components/ayudante/EstadoAsignacion': { EstadoAsignacion },
     '@/components/ayudante/CatalogoCarrito': carrito,
     '@/lib/ayudante/catalogo-server': { obtenerCatalogoAyudante: async () => datosCatalogo },
+    '@/lib/ayudante/ventas-model': modeloVentas,
+    '@/lib/ayudante/ventas-server': { obtenerResumenVentas: async () => ({ estado: 'pendiente' }), obtenerHistorialVentas: async () => ({ estado: 'pendiente' }) },
+    '@/components/ayudante/ResumenVentas': { ResumenVentas },
+    '@/components/ayudante/HistorialVentas': { HistorialVentas },
   }).default({ searchParams: Promise.resolve({}) })
 }
 async function fixtures(incluirCarritos = false) {
@@ -148,7 +155,7 @@ async function pruebas() {
       for (const [href] of pantallas) assert.ok(html.includes(`href="${href}"`))
       assert.ok(html.includes('aria-current="page"'))
       assert.ok(html.includes('Cerrar sesión'))
-      assert.doesNotMatch(html, /<form|<video/)
+      assert.doesNotMatch(html, /<form[^>]*method="post"|<video/)
       if (ruta.endsWith('/nueva')) assert.match(html, /disabled=""[^>]*>Confirmar cobro/)
       if (ruta.endsWith('/historial')) assert.match(html, /<fieldset disabled=""/)
     }
