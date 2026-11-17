@@ -42,7 +42,7 @@ export function CatalogoCarrito({ datos, onCambio }: { datos: DatosCatalogo; onC
 
   return <div className="space-y-5">
     {datos.modo === 'demostracion' && <div role="status" className="rounded-xl border border-cyan/50 bg-cyan/10 p-4 text-sm text-cyan">
-      <p className="font-bold">Demostración · Productos y negocios ficticios</p><p className="mt-1">Solo para probar el carrito. No representa un catálogo real ni permite cobrar.</p>
+      <p className="font-bold">Demostración · Productos y negocios ficticios</p><p className="mt-1">Catálogo ficticio para simulación. Sin cobros reales.</p>
     </div>}
     <p className="text-sm text-muted">Importes informativos: el cobro deberá verificar disponibilidad y recalcular precios vigentes antes de confirmarse.</p>
     {error && <p role="alert" className="rounded-lg border border-pink/40 p-3 text-sm text-pink">{error}</p>}
