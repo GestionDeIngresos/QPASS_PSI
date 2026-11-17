@@ -5,6 +5,12 @@ import { exigirNegocio } from '@/lib/negocio/server'
 
 export const metadata: Metadata = { title: 'Detalle de Negocio · QPass' }
 
+type AyudanteInfo = {
+  usuarioId: string
+  activo: boolean
+  negocios: { id: number; nombre: string; activo: boolean }[]
+}
+
 function formatearFecha(iso: string) {
   return new Date(iso).toLocaleDateString('es-BO', {
     timeZone: 'America/La_Paz',
@@ -33,7 +39,7 @@ export default async function DetalleNegocioPage({ params }: { params: Promise<{
 
   if (!/^\d+$/.test(id)) notFound()
 
-  const [{ data: negocio }, { count: totalProductos }] = await Promise.all([
+  const [{ data: negocio }, { count: totalProductos }, rpcResult] = await Promise.all([
     supabase
       .from('negocios')
       .select('id, nombre, descripcion, estado, creado_en')
@@ -44,7 +50,14 @@ export default async function DetalleNegocioPage({ params }: { params: Promise<{
       .from('productos')
       .select('*', { count: 'exact', head: true })
       .eq('negocio_id', Number(id)),
+    supabase.rpc('listar_ayudantes_dueno'),
   ])
+
+  const negocioId = Number(id)
+  const todosAyudantes = (rpcResult.data ?? []) as AyudanteInfo[]
+  const ayudantesActivos = todosAyudantes.filter((a) =>
+    a.activo && a.negocios.some((n) => n.id === negocioId && n.activo)
+  ).length
 
   if (!negocio) notFound()
 
@@ -96,6 +109,23 @@ export default async function DetalleNegocioPage({ params }: { params: Promise<{
             className="rounded-lg bg-cyan/10 px-5 py-2.5 text-sm font-bold text-cyan transition hover:bg-cyan/20"
           >
             Ver catálogo
+          </Link>
+        </div>
+      </section>
+
+      {/* Tarjeta de ayudantes */}
+      <section className="mt-5 rounded-2xl border border-border bg-card p-6 shadow-[0_0_40px_rgba(157,0,255,0.08)]">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-wide text-muted">Gestionar Ayudantes</h2>
+            <p className="mt-1 text-2xl font-extrabold text-white">{ayudantesActivos}</p>
+            <p className="text-xs text-muted">{ayudantesActivos === 1 ? 'ayudante activo' : 'ayudantes activos'}</p>
+          </div>
+          <Link
+            href={`/negocio/ayudantes?negocio=${negocio.id}`}
+            className="rounded-lg bg-cyan/10 px-5 py-2.5 text-sm font-bold text-cyan transition hover:bg-cyan/20"
+          >
+            Ver ayudantes
           </Link>
         </div>
       </section>

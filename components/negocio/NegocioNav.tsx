@@ -3,11 +3,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-type ItemMenu = { href: string; etiqueta: string; icono: 'tienda' | 'caja' }
+type ItemMenu = { href: string; etiqueta: string; icono: 'tienda' | 'caja' | 'persona' }
 
 const MENU: ItemMenu[] = [
   { href: '/negocio/negocios', etiqueta: 'Mis Negocios', icono: 'tienda' },
   { href: '/negocio/productos', etiqueta: 'Productos', icono: 'caja' },
+  { href: '/negocio/ayudantes', etiqueta: 'Ayudantes', icono: 'persona' },
 ]
 
 function Icono({ tipo }: { tipo: ItemMenu['icono'] }) {
@@ -21,17 +22,26 @@ function Icono({ tipo }: { tipo: ItemMenu['icono'] }) {
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
   }
-  return tipo === 'tienda' ? (
+  if (tipo === 'tienda') return (
     <svg {...comun}>
       <path d="M3 9l1-5h16l1 5" />
       <path d="M3 9h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9z" />
       <path d="M9 21V12h6v9" />
     </svg>
-  ) : (
+  )
+  if (tipo === 'caja') return (
     <svg {...comun}>
       <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
       <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
       <line x1="12" y1="22.08" x2="12" y2="12" />
+    </svg>
+  )
+  return (
+    <svg {...comun}>
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   )
 }
