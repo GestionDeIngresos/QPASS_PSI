@@ -33,7 +33,10 @@ export default async function ConfirmacionPage({ params }: { params: Promise<{ c
           <h1 className="mt-6 text-3xl font-extrabold text-white">{pagado ? '¡Compra de prueba confirmada!' : 'Compra de prueba pendiente'}</h1>
           <p className="mt-2 text-sm font-bold text-cyan">Modo de prueba · No se movió dinero real.</p>
           <p className="mt-2 text-sm text-[#A29DB8]">
-            {pagado ? 'Tus entradas de prueba ya están en tu cuenta. Encuentra sus QR en «Mis Compras».' : 'La compra todavía no está confirmada.'}
+            {pagado ? compra.para_terceros
+              ? 'Compraste para otra persona. El destinatario puede consultar sus entradas y QR desde «Mis Compras» en su cuenta. Tú conservas este comprobante.'
+              : 'Tus entradas de prueba ya están en tu cuenta. Encuentra sus QR en «Mis Compras».'
+              : 'La compra todavía no está confirmada.'}
           </p>
         </div>
 
@@ -61,11 +64,12 @@ export default async function ConfirmacionPage({ params }: { params: Promise<{ c
                   <p className="text-xs text-[#A29DB8]">{formatFechaEvento(e.evento.fecha_evento)}</p>
                   <p className="mt-1 text-xs font-semibold text-[#00F0FF]">{e.tipo_ticket.nombre}</p>
                 </div>
-                <span className="shrink-0 text-sm text-white">{formatMoney(e.tipo_ticket.precio)}</span>
+                <span className="max-w-36 text-right text-xs text-muted">Precio unitario histórico no disponible</span>
               </li>
             ))}
           </ul>
 
+          <p className="mb-4 text-xs text-muted">Los importes siguientes son los registrados en la compra. El catálogo actual no permite reconstruir sus precios unitarios históricos.</p>
           <div className="space-y-2 border-t border-[#231B45] pt-5 text-sm">
             <div className="flex justify-between text-[#A29DB8]">
               <span>Subtotal</span>
@@ -87,7 +91,7 @@ export default async function ConfirmacionPage({ params }: { params: Promise<{ c
             href="/mis-compras"
             className="inline-flex w-full items-center justify-center rounded-lg bg-[#FF007A] px-5 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-[0_0_24px_-6px_#FF007A] transition hover:brightness-110 sm:w-auto"
           >
-            Ver mis entradas
+            {compra.para_terceros ? 'Volver a Mis Compras' : 'Ver mis entradas'}
           </Link>
           <DescargarComprobante compra={compra} />
         </div>

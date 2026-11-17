@@ -29,7 +29,9 @@ export default async function ComprarPage({ params, searchParams }: Props) {
   if (!evento) notFound()
 
   // Comprar exige sesión. (La función SQL vuelve a comprobarlo: esto es solo UX.)
-  if (!await obtenerSesionActual()) redirect('/login')
+  const sesion = await obtenerSesionActual()
+  if (!sesion) redirect('/login')
+  if (sesion.perfil?.activo !== true) redirect('/login')
 
   const sinVenta = eventoFinalizado(evento.fecha_evento) || !evento.tickets.some((t) => t.cantidad_disponible > 0)
   if (sinVenta) {
@@ -51,5 +53,5 @@ export default async function ComprarPage({ params, searchParams }: Props) {
     )
   }
 
-  return <CompraEntradas evento={evento} paraOtrosInicial={para === 'otros'} />
+  return <CompraEntradas evento={evento} compradorId={sesion.user.id} paraOtrosInicial={para === 'otros'} />
 }
