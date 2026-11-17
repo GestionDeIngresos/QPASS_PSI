@@ -33,12 +33,18 @@ export default async function DetalleNegocioPage({ params }: { params: Promise<{
 
   if (!/^\d+$/.test(id)) notFound()
 
-  const { data: negocio } = await supabase
-    .from('negocios')
-    .select('id, nombre, descripcion, estado, creado_en')
-    .eq('id', Number(id))
-    .eq('dueno_id', user.id)
-    .maybeSingle()
+  const [{ data: negocio }, { count: totalProductos }] = await Promise.all([
+    supabase
+      .from('negocios')
+      .select('id, nombre, descripcion, estado, creado_en')
+      .eq('id', Number(id))
+      .eq('dueno_id', user.id)
+      .maybeSingle(),
+    supabase
+      .from('productos')
+      .select('*', { count: 'exact', head: true })
+      .eq('negocio_id', Number(id)),
+  ])
 
   if (!negocio) notFound()
 
@@ -73,6 +79,23 @@ export default async function DetalleNegocioPage({ params }: { params: Promise<{
             className="rounded-lg bg-yellow-400/10 px-5 py-2.5 text-sm font-bold text-yellow-300 transition hover:bg-yellow-400/20"
           >
             Editar negocio
+          </Link>
+        </div>
+      </section>
+
+      {/* Tarjeta de productos */}
+      <section className="mt-5 rounded-2xl border border-border bg-card p-6 shadow-[0_0_40px_rgba(157,0,255,0.08)]">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-wide text-muted">Gestionar Productos</h2>
+            <p className="mt-1 text-2xl font-extrabold text-white">{totalProductos ?? 0}</p>
+            <p className="text-xs text-muted">{totalProductos === 1 ? 'producto' : 'productos'} en el catálogo</p>
+          </div>
+          <Link
+            href={`/negocio/productos?negocio=${negocio.id}`}
+            className="rounded-lg bg-cyan/10 px-5 py-2.5 text-sm font-bold text-cyan transition hover:bg-cyan/20"
+          >
+            Ver catálogo
           </Link>
         </div>
       </section>
