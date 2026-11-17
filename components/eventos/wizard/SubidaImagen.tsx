@@ -11,10 +11,12 @@ export function SubidaImagen({
   etiqueta,
   valor,
   onCambio,
+  onSubiendo,
 }: {
   etiqueta: string
   valor: string
   onCambio: (url: string) => void
+  onSubiendo?: (subiendo: boolean) => void
 }) {
   const input = useRef<HTMLInputElement>(null)
   const [subiendo, setSubiendo] = useState(false)
@@ -26,24 +28,30 @@ export function SubidaImagen({
     if (archivo.size > MAX_MB * 1024 * 1024) return setError(`La imagen no puede pesar más de ${MAX_MB} MB.`)
 
     setSubiendo(true)
-    const supabase = createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
+    onSubiendo?.(true)
+    try {
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) {
+        return setError('Tu sesión expiró. Vuelve a iniciar sesión.')
+      }
+
+      const ext = archivo.type === 'image/png' ? 'png' : archivo.type === 'image/webp' ? 'webp' : 'jpg'
+      const ruta = `${user.id}/${crypto.randomUUID()}.${ext}`
+      const { error: errorSubida } = await supabase.storage
+        .from('eventos')
+        .upload(ruta, archivo, { contentType: archivo.type })
+      if (errorSubida) return setError('No se pudo subir la imagen. Intenta de nuevo.')
+
+      onCambio(supabase.storage.from('eventos').getPublicUrl(ruta).data.publicUrl)
+    } catch {
+      setError('No se pudo conectar para subir la imagen. Intenta de nuevo.')
+    } finally {
       setSubiendo(false)
-      return setError('Tu sesión expiró. Vuelve a iniciar sesión.')
+      onSubiendo?.(false)
     }
-
-    const ext = archivo.type === 'image/png' ? 'png' : archivo.type === 'image/webp' ? 'webp' : 'jpg'
-    const ruta = `${user.id}/${crypto.randomUUID()}.${ext}`
-    const { error: errorSubida } = await supabase.storage
-      .from('eventos')
-      .upload(ruta, archivo, { contentType: archivo.type })
-    setSubiendo(false)
-    if (errorSubida) return setError('No se pudo subir la imagen. Intenta de nuevo.')
-
-    onCambio(supabase.storage.from('eventos').getPublicUrl(ruta).data.publicUrl)
   }
 
   const nombre = valor ? decodeURIComponent(valor.split('/').pop() ?? '') : ''

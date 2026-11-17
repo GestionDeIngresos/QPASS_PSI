@@ -10,6 +10,8 @@ export type LineaCompra = {
 
 /** Lo que el navegador le manda a la Server Action */
 export type CompraInput = {
+  solicitudId: string
+  resultadoPrueba: 'aprobado' | 'rechazado' | 'vencido'
   eventoId: string
   lineas: LineaCompra[]
   /** null = compra para sí mismo; correo = compra para otra persona */

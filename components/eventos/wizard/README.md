@@ -35,6 +35,12 @@ Tus políticas RLS (organizador) deben impedir que cambie `estado` a 'publicado'
 - `cargarBorrador(supabase, eventoId)` → `EventoBorrador | null`
 Tipos y validación (cliente y servidor): `lib/eventos/wizard-types.ts`.
 
+## Sprint 3: concurrencia y cupos
+
+Aplicar `supabase/sprint3_devA_edicion_segura.sql` después del SQL de Dev A Sprint 2. `cargarBorrador` incluye `versionEdicion` del evento y de cada ticket; conservar esas propiedades al editar y usar `guardarEventoCompleto`. Crear un evento/ticket nuevo no requiere versiones. La RPC de guardado sigue siendo SECURITY INVOKER y respeta las políticas existentes.
+
+Cualquier venta o cambio en un ticket incrementa su versión. Guardar datos antiguos se rechaza con un mensaje de recarga, sin reponer el cupo vendido. También se rechaza una edición de evento que quedó antigua por otra edición. No volver a ejecutar el SQL viejo de Sprint 2 después de esta migración, pues restauraría la función anterior.
+
 ## Datos
 - Cronograma = `eventos.fecha_evento` (inicio) + `eventos.fecha_fin` (fin), hora de Bolivia.
 - Imágenes: bucket público `eventos`, ruta `<user-id>/<uuid>.<ext>` (5 MB, JPG/PNG/WEBP).

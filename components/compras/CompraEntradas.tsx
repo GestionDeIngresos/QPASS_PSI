@@ -38,6 +38,8 @@ export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null)
   const [errorCorreo, setErrorCorreo] = useState<string | null>(null)
   const [pendiente, startTransition] = useTransition()
+  const [resultadoPrueba, setResultadoPrueba] = useState<'aprobado' | 'rechazado' | 'vencido'>('aprobado')
+  const intento = useRef<{ firma: string; id: string } | null>(null)
 
   const ticketDe = (id: string) => tickets.find((t) => t.id === id)
   const resumen = calcularResumen(lineas, tickets)
@@ -85,11 +87,15 @@ export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
 
     startTransition(async () => {
       try {
-        const r = await comprarEntradas({
+        const seleccion = {
           eventoId: evento.id,
           lineas: lineas.map(({ tipoTicketId, cantidad }) => ({ tipoTicketId, cantidad })),
           correoDestino: paraOtros ? correo : null,
-        })
+          resultadoPrueba,
+        }
+        const firma = JSON.stringify(seleccion)
+        if (!intento.current || intento.current.firma !== firma) intento.current = { firma, id: crypto.randomUUID() }
+        const r = await comprarEntradas({ ...seleccion, solicitudId: intento.current.id })
         if (r.ok) router.push(`/compra/confirmacion/${encodeURIComponent(r.compraId)}`)
         else if (r.campo === 'correo') setErrorCorreo(r.error)
         else setErrorGeneral(r.error)
@@ -121,6 +127,15 @@ export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
       <h1 className="mb-8 text-3xl font-extrabold text-white md:text-4xl">
         {titulo}
       </h1>
+      <div className="mb-6 rounded-xl border border-cyan/40 bg-cyan/10 p-4 text-sm text-cyan">
+        <p className="font-bold">Modo de prueba · Sin dinero real</p>
+        <p className="mt-1">No necesitas banco ni pagar Bs 1. Una aprobación genera entradas de prueba y usa cupo de los eventos de prueba.</p>
+        <label className="mt-3 block">Resultado a probar
+          <select className={`${claseSelect} ml-3`} value={resultadoPrueba} disabled={pendiente} onChange={e => setResultadoPrueba(e.target.value as typeof resultadoPrueba)}>
+            <option value="aprobado">Pago aprobado</option><option value="rechazado">Pago rechazado</option><option value="vencido">Pago vencido</option>
+          </select>
+        </label>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)] lg:items-start lg:gap-10">
         <ResumenEvento evento={evento} />

@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import { CompraEntradas } from '@/components/compras/CompraEntradas'
 import { eventoFinalizado } from '@/lib/eventos/format'
 import { obtenerEvento } from '@/lib/eventos/queries'
-import { createClient } from '@/lib/supabase/server'
+import { obtenerSesionActual } from '@/lib/auth/sesion'
 
 type Props = {
   params: Promise<{ id: string }>
@@ -29,11 +29,7 @@ export default async function ComprarPage({ params, searchParams }: Props) {
   if (!evento) notFound()
 
   // Comprar exige sesión. (La función SQL vuelve a comprobarlo: esto es solo UX.)
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  if (!await obtenerSesionActual()) redirect('/login')
 
   const sinVenta = eventoFinalizado(evento.fecha_evento) || !evento.tickets.some((t) => t.cantidad_disponible > 0)
   if (sinVenta) {

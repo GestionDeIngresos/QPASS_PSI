@@ -30,9 +30,10 @@ export default async function ConfirmacionPage({ params }: { params: Promise<{ c
               <path d="M5 12.5l4.5 4.5L19 7.5" />
             </svg>
           </div>
-          <h1 className="mt-6 text-3xl font-extrabold text-white">¡Compra confirmada!</h1>
+          <h1 className="mt-6 text-3xl font-extrabold text-white">{pagado ? '¡Compra de prueba confirmada!' : 'Compra de prueba pendiente'}</h1>
+          <p className="mt-2 text-sm font-bold text-cyan">Modo de prueba · No se movió dinero real.</p>
           <p className="mt-2 text-sm text-[#A29DB8]">
-            Tus entradas ya están en tu cuenta. Encuentra el código QR de cada una en «Mis Compras».
+            {pagado ? 'Tus entradas de prueba ya están en tu cuenta. Encuentra sus QR en «Mis Compras».' : 'La compra todavía no está confirmada.'}
           </p>
         </div>
 

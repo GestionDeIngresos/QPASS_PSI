@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { obtenerSesionActual } from '@/lib/auth/sesion'
 import { Faq } from '@/components/landing/Faq'
 import { Hero } from '@/components/landing/Hero'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -16,9 +16,8 @@ export const dynamic = 'force-dynamic'
 
 // "/" → Landing pública (HU 1). Se ve sin iniciar sesión.
 export default async function Home() {
-  const supabase = await createClient()
-  const [{ data: { user } }, destacados, pasados] = await Promise.all([
-    supabase.auth.getUser(),
+  const [sesion, destacados, pasados] = await Promise.all([
+    obtenerSesionActual(),
     listarCarrusel(),
     listarPasados(),
   ])
@@ -27,7 +26,7 @@ export default async function Home() {
     <>
       <LandingNav />
       <Hero destacado={destacados[0] ?? null} />
-      <QuienesSomos sesionIniciada={Boolean(user)} />
+      <QuienesSomos sesionIniciada={Boolean(sesion)} />
       <SeccionEventos
         id="eventos"
         etiqueta="Live lineup"
