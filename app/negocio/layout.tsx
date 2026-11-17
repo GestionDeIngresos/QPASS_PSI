@@ -5,7 +5,7 @@ import { exigirNegocio } from '@/lib/negocio/server'
 
 function Logo({ className = '' }: { className?: string }) {
   return (
-    <Link href="/negocio/negocios" className={`flex items-center gap-2 text-xl font-bold text-white ${className}`}>
+    <Link href="/negocio" className={`flex items-center gap-2 text-xl font-bold text-white ${className}`}>
       <span className="h-2 w-2 rounded-full bg-pink" />
       <span className="underline decoration-pink underline-offset-4">Q</span>Pass
     </Link>

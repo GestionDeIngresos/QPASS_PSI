@@ -3,9 +3,15 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-type ItemMenu = { href: string; etiqueta: string; icono: 'tienda' | 'caja' | 'persona' }
+type ItemMenu = {
+  href: string
+  etiqueta: string
+  icono: 'panel' | 'tienda' | 'caja' | 'persona'
+  exacta?: boolean
+}
 
 const MENU: ItemMenu[] = [
+  { href: '/negocio', etiqueta: 'Dashboard', icono: 'panel', exacta: true },
   { href: '/negocio/negocios', etiqueta: 'Mis Negocios', icono: 'tienda' },
   { href: '/negocio/productos', etiqueta: 'Productos', icono: 'caja' },
   { href: '/negocio/ayudantes', etiqueta: 'Ayudantes', icono: 'persona' },
@@ -22,6 +28,14 @@ function Icono({ tipo }: { tipo: ItemMenu['icono'] }) {
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
   }
+  if (tipo === 'panel') return (
+    <svg {...comun}>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  )
   if (tipo === 'tienda') return (
     <svg {...comun}>
       <path d="M3 9l1-5h16l1 5" />
@@ -53,7 +67,9 @@ export function NegocioNav({ horizontal = false }: { horizontal?: boolean }) {
   return (
     <nav className={horizontal ? 'flex gap-2 overflow-x-auto px-4 py-3' : 'flex flex-col gap-2 px-4 py-4'}>
       {MENU.map((item) => {
-        const actual = ruta === item.href || ruta.startsWith(item.href + '/')
+        const actual = item.exacta
+          ? ruta === item.href
+          : ruta === item.href || ruta.startsWith(item.href + '/')
         return (
           <Link
             key={item.href}
