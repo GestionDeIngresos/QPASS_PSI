@@ -16,6 +16,7 @@ const ENLACES_POR_ROL: Record<string, { href: string; etiqueta: string }[]> = {
     { href: '/organizador/eventos', etiqueta: 'Mis eventos' },
   ],
   negocio: [{ href: '/negocio/negocios', etiqueta: 'Mis negocios' }],
+  devolucion: [{ href: '/devolucion/solicitudes', etiqueta: 'Solicitudes virtuales' }],
 }
 const ENLACES_COMUNES = [
   { href: '/', etiqueta: 'Inicio' },

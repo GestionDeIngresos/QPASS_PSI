@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 // Rutas que exigen sesión (por prefijo). /admin y /organizador ya quedan cubiertas para el Sprint 2.
-const RUTAS_PROTEGIDAS = ['/eventos', '/compra', '/mis-compras', '/admin', '/organizador', '/supervisor', '/mi-cuenta', '/negocio']
+const RUTAS_PROTEGIDAS = ['/eventos', '/compra', '/mis-compras', '/admin', '/organizador', '/supervisor', '/mi-cuenta', '/negocio', '/devolucion']
 // Pantallas de acceso: con sesión iniciada no tiene sentido mostrarlas.
 const RUTAS_SOLO_INVITADOS = ['/login', '/register']
 
