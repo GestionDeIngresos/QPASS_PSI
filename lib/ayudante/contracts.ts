@@ -2,7 +2,8 @@ import type { IdentidadQr } from '@/lib/qr/types';
 
 /** DTO propuestos de la aplicación; NO son tablas, columnas o RPC de B/C.
  * Sus adaptadores se acordarán cuando estén disponibles los contratos reales.
- * Puntos se serializa como decimal textual: precisión/unidad pendientes de B.
+ * Puntos se serializa como decimal textual; el catálogo real usa numeric(10,2).
+ * La equivalencia precio/puntos de la propuesta v1 requiere revisión B/C.
  */
 export type PuntosVista = string;
 export type Integracion<T> = { estado: 'pendiente' } | { estado: 'disponible'; datos: T };

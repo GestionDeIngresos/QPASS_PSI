@@ -12,7 +12,7 @@ const errores: Record<string, string> = {
 };
 const campo = 'w-full min-w-0 rounded-lg border border-border bg-bg px-3 py-2.5 text-sm';
 
-export function CatalogoCarrito({ datos }: { datos: DatosCatalogo }) {
+export function CatalogoCarrito({ datos, onCambio }: { datos: DatosCatalogo; onCambio?: (carrito: Carrito) => void }) {
   const [carrito, setCarrito] = useState<Carrito>({ negocioId: '', lineas: [] });
   const [busqueda, setBusqueda] = useState('');
   const [error, setError] = useState('');
@@ -36,6 +36,7 @@ export function CatalogoCarrito({ datos }: { datos: DatosCatalogo }) {
       return;
     }
     setCarrito(resultado.carrito); setError(''); setCambioPendiente(null);
+    onCambio?.(resultado.carrito);
     if (accion.tipo === 'negocio') setBusqueda('');
   }
 

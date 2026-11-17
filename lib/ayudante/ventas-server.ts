@@ -3,21 +3,21 @@ import { exigirEventoAyudante } from './auth';
 import { idVentaValido, leerFiltrosVentas } from './ventas-model';
 import type { FiltrosVentas, LecturaDetalle, LecturaHistorial, LecturaResumen } from './ventas-types';
 
-// Lectura real deliberadamente desconectada: faltan ventas/venta_items, alcance
-// comercial y RLS confirmados. No recibe registros ni importes desde el navegador.
+// Las lecturas HU 59/62/63 usan sesión aunque los cobros estén desactivados.
 export async function obtenerResumenVentas(eventoId: number): Promise<LecturaResumen> {
-  await exigirEventoAyudante(eventoId);
-  return { estado: 'pendiente' };
+  const { sesion } = await exigirEventoAyudante(eventoId);
+  const { resumenReal } = await import('./comercio-server');
+  return { estado: 'disponible', resumen: await resumenReal(sesion.supabase, eventoId) };
 }
-export async function obtenerHistorialVentas(eventoId: number, filtros: FiltrosVentas): Promise<LecturaHistorial> {
-  await exigirEventoAyudante(eventoId);
-  // Los filtros están tipados para el futuro adaptador, no se envían a una RPC inventada.
+export async function obtenerHistorialVentas(eventoId: number, filtros: FiltrosVentas, antes?: string): Promise<LecturaHistorial> {
+  const { sesion } = await exigirEventoAyudante(eventoId);
   if (leerFiltrosVentas(filtros).error) throw new Error('Filtros inválidos.');
-  return { estado: 'pendiente' };
+  const { historialReal } = await import('./comercio-server');
+  return historialReal(sesion.supabase, sesion.user.id, eventoId, filtros, antes);
 }
 export async function obtenerDetalleVenta(eventoId: number, ventaId: string): Promise<LecturaDetalle> {
-  await exigirEventoAyudante(eventoId);
+  const { sesion } = await exigirEventoAyudante(eventoId);
   if (!idVentaValido(ventaId)) return { estado: 'no_encontrada' };
-  // No usar el ID de la URL como prueba de existencia/confirmación/autorización.
-  return { estado: 'pendiente' };
+  const { detalleReal } = await import('./comercio-server');
+  return detalleReal(sesion.supabase, sesion.user.id, eventoId, ventaId);
 }

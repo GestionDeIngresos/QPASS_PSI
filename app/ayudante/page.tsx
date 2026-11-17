@@ -14,7 +14,7 @@ export default async function AyudantePage() {
     <EstadoAsignacion asignacion={asignacion} />
     <ResumenVentas lectura={lectura} />
     <section className="flex flex-col gap-5 rounded-2xl border border-pink/30 bg-card p-6 sm:flex-row sm:items-center sm:justify-between">
-      <div><h2 className="text-xl font-bold">Prepara una nueva venta</h2><p className="mt-2 text-sm text-muted">Las estadísticas estarán disponibles cuando se habiliten las ventas. Fechas según la hora de Bolivia.</p></div>
+      <div><h2 className="text-xl font-bold">Prepara una nueva venta</h2><p className="mt-2 text-sm text-muted">Las métricas incluyen únicamente ventas confirmadas de tu alcance autorizado. Fechas según la hora de Bolivia.</p></div>
       <Link href="/ayudante/ventas/nueva" className="shrink-0 rounded-lg bg-pink px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-pink-hover">Ir a Nueva venta</Link>
     </section>
   </>;

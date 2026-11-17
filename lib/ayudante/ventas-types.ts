@@ -13,6 +13,7 @@ export type ResumenVentas = { ventasDia: number; ventasMes: number; puntosCobrad
 export type LecturaResumen = { estado: 'pendiente' } | { estado: 'disponible'; resumen: ResumenVentas };
 export type LecturaHistorial = { estado: 'pendiente' } | {
   estado: 'disponible'; ventas: VentaAutorizada[]; negocios: { id: string; nombre: string }[];
+  siguienteCursor?: string | null;
 };
 export type LecturaDetalle = { estado: 'pendiente' } | { estado: 'no_encontrada' } | { estado: 'disponible'; venta: VentaAutorizada };
 

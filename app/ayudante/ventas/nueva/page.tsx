@@ -3,12 +3,18 @@ import { EstadoAsignacion } from '@/components/ayudante/EstadoAsignacion';
 import Link from 'next/link';
 import { obtenerCatalogoAyudante } from '@/lib/ayudante/catalogo-server';
 import { CatalogoCarrito } from '@/components/ayudante/CatalogoCarrito';
+import { VentaIntegrada } from '@/components/ayudante/VentaIntegrada';
 
 export default async function NuevaVentaPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { asignacion } = await obtenerContextoAyudante();
   if (asignacion.estado !== 'asignado') return <><h1 className="text-3xl font-extrabold">Nueva venta</h1><EstadoAsignacion asignacion={asignacion} /></>;
   const demostracion = (await searchParams).demo === 'catalogo';
   const datos = await obtenerCatalogoAyudante(asignacion.eventoId, demostracion);
+  if (datos.estado === 'disponible' && datos.modo === 'integrado') return <>
+    <h1 className="text-3xl font-extrabold">Nueva venta</h1>
+    <EstadoAsignacion asignacion={asignacion} />
+    <VentaIntegrada catalogo={datos.catalogo} />
+  </>;
   return <>
     <div><h1 className="text-3xl font-extrabold">Nueva venta</h1><p className="mt-2 text-sm text-muted">Productos, carrito e identificación del asistente en un solo lugar.</p></div>
     <EstadoAsignacion asignacion={asignacion} />

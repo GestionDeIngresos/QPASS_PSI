@@ -1,0 +1,159 @@
+{
+  "capturado_en": "2026-11-17T03:22:18.126Z",
+  "proyecto": "gnpqyrypallnloltwceu.supabase.co",
+  "peticiones": 22,
+  "alcance": "Solo GET/HEAD con clave privilegiada; sin RPC ni escrituras. Solo agregados persistidos. Lecturas HTTP independientes: NO snapshot transaccional. Metadatos API NO acreditan RLS/triggers/cuerpos actuales.",
+  "catalogo_fuente_sha256": "dbee7ad1fa7f95ea7741d7e61eca365f174caa1087adc781f58c9718574c4a07",
+  "columnas_comerciales_api": {
+    "negocios": [
+      "id",
+      "dueno_id",
+      "nombre",
+      "descripcion",
+      "estado",
+      "creado_en"
+    ],
+    "productos": [
+      "id",
+      "negocio_id",
+      "nombre",
+      "descripcion",
+      "precio",
+      "disponible"
+    ],
+    "ayudantes": [
+      "id",
+      "negocio_id",
+      "usuario_id",
+      "activo"
+    ],
+    "asignaciones_staff": [
+      "id",
+      "usuario_id",
+      "evento_id",
+      "rol_staff",
+      "asignado_en"
+    ],
+    "saldos_puntos": [
+      "id",
+      "usuario_id",
+      "evento_id",
+      "saldo"
+    ],
+    "solicitudes_devolucion": [
+      "id",
+      "usuario_id",
+      "evento_id",
+      "monto_solicitado",
+      "qr_bancario_url",
+      "estado",
+      "creado_en"
+    ],
+    "devoluciones": [
+      "id",
+      "solicitud_id",
+      "usuario_id",
+      "encargado_id",
+      "monto",
+      "comprobante_url",
+      "foto_usuario_url",
+      "procesado_en"
+    ],
+    "recargas": [
+      "id",
+      "recargador_id",
+      "usuario_id",
+      "evento_id",
+      "monto",
+      "creado_en"
+    ],
+    "ventas": [
+      "id",
+      "ayudante_id",
+      "negocio_id",
+      "cliente_id",
+      "evento_id",
+      "total",
+      "comprobante_url",
+      "creado_en"
+    ],
+    "venta_items": [
+      "id",
+      "venta_id",
+      "producto_id",
+      "cantidad",
+      "precio_unitario"
+    ],
+    "negocios_eventos": null
+  },
+  "rpcs_api": [
+    "comprar_entradas",
+    "comprar_entradas_prueba",
+    "comprar_entradas_terceros_prueba",
+    "consultar_compra_propia",
+    "consultar_lote_qr",
+    "consultar_mis_reportes_entrada",
+    "corregir_acceso",
+    "eliminar_evento_sin_ventas",
+    "es_admin",
+    "estadisticas_evento",
+    "evento_tiene_entradas",
+    "eventos_supervisor",
+    "generar_lote_qr",
+    "guardar_evento_completo",
+    "historial_accesos",
+    "identificar_qr",
+    "listar_reportes_admin",
+    "qpass_autorizado_evento",
+    "registrar_acceso",
+    "reportar_acceso",
+    "reportar_entrada_propia",
+    "resolver_reporte_admin",
+    "resumen_dashboard",
+    "vincular_manilla"
+  ],
+  "conteos": {
+    "negocios": 0,
+    "productos": 0,
+    "ayudantes": 0,
+    "asignaciones_staff": 2,
+    "saldos_puntos": 0,
+    "solicitudes_devolucion": 0,
+    "devoluciones": 0,
+    "recargas": 0,
+    "ventas": 0,
+    "venta_items": 0
+  },
+  "datos": {
+    "solicitudes_por_estado": {
+      "en_revision": 0,
+      "aprobada": 0,
+      "rechazada": 0
+    },
+    "solicitudes_con_estado_no_reconocido": 0,
+    "negocios_activos": 0,
+    "productos_disponibles": 0,
+    "precios_negativos": 0,
+    "ayudantes_activos": 0,
+    "ayudantes_activos_con_negocio_cuenta_rol_y_staff_validos": 0,
+    "ayudantes_activos_sin_staff": 0,
+    "ayudantes_activos_con_staff_ambiguo": 0,
+    "relacion_negocio_evento_api": "no_expuesta",
+    "pares_negocio_evento_leidos": null,
+    "reservas_v1_sin_saldo": 0,
+    "reservas_v1_superiores_al_saldo": 0,
+    "cuentas_saldo_duplicadas": 0,
+    "devoluciones_sin_solicitud": 0,
+    "devoluciones_con_solicitud_inexistente_o_usuario_distinto": 0,
+    "solicitudes_con_pagado_superior_al_solicitado": 0,
+    "solicitudes_aprobadas_con_devolucion": 0,
+    "ventas_con_total_distinto_de_lineas_o_sin_lineas": 0,
+    "saldos_distintos_de_recargas_menos_ventas_menos_devoluciones": 0
+  },
+  "interpretaciones_no_confirmadas": [
+    "Unidad monetaria/puntos de productos.precio",
+    "Si saldo ya descuenta reservas",
+    "Semantica de liquidacion de devoluciones",
+    "Aprobacion B/C de negocios_eventos y reservas v1"
+  ]
+}

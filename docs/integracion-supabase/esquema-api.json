@@ -1,0 +1,1832 @@
+{
+  "capturadoEn": "2026-11-16T19:28:39.009Z",
+  "proyecto": "gnpqyrypallnloltwceu.supabase.co",
+  "alcance": "OpenAPI de public visible para la clave configurada; NO es pg_dump ni auditoría de RLS, triggers o cuerpos SQL. Sin filas de negocio.",
+  "versionAPI": "14.18",
+  "tablas": {
+    "asignaciones_staff": {
+      "requeridasSegunAPI": [
+        "id",
+        "usuario_id",
+        "evento_id",
+        "rol_staff",
+        "asignado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "usuario_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "evento_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "eventos",
+            "columna": "id"
+          }
+        },
+        "rol_staff": {
+          "type": "string",
+          "format": "public.rol_usuario",
+          "enum": [
+            "admin",
+            "cliente",
+            "recargador",
+            "supervisor",
+            "devolucion",
+            "negocio",
+            "ayudante",
+            "escaneador",
+            "organizador"
+          ]
+        },
+        "asignado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        }
+      }
+    },
+    "auditoria_accesos": {
+      "requeridasSegunAPI": [
+        "id",
+        "registro_id",
+        "actor_id",
+        "motivo",
+        "antes",
+        "despues",
+        "creado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "clavePrimaria": true
+        },
+        "registro_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "registros_acceso",
+            "columna": "id"
+          }
+        },
+        "actor_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "motivo": {
+          "type": "string",
+          "format": "text"
+        },
+        "antes": {
+          "format": "jsonb"
+        },
+        "despues": {
+          "format": "jsonb"
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        }
+      }
+    },
+    "ayudantes": {
+      "requeridasSegunAPI": [
+        "id",
+        "negocio_id",
+        "usuario_id",
+        "activo"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "negocio_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "negocios",
+            "columna": "id"
+          }
+        },
+        "usuario_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "activo": {
+          "type": "boolean",
+          "format": "boolean",
+          "default": true
+        }
+      }
+    },
+    "categorias_evento": {
+      "requeridasSegunAPI": [
+        "id",
+        "nombre",
+        "estado"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "nombre": {
+          "type": "string",
+          "format": "character varying",
+          "maxLength": 80
+        },
+        "descripcion": {
+          "type": "string",
+          "format": "text"
+        },
+        "estado": {
+          "type": "boolean",
+          "format": "boolean",
+          "default": true
+        }
+      }
+    },
+    "compras": {
+      "requeridasSegunAPI": [
+        "id",
+        "comprador_id",
+        "subtotal",
+        "cargos_servicio",
+        "total",
+        "estado_pago",
+        "creado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "comprador_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "subtotal": {
+          "type": "number",
+          "format": "numeric"
+        },
+        "cargos_servicio": {
+          "type": "number",
+          "format": "numeric",
+          "default": 0
+        },
+        "total": {
+          "type": "number",
+          "format": "numeric"
+        },
+        "estado_pago": {
+          "type": "string",
+          "format": "public.estado_pago",
+          "enum": [
+            "pendiente",
+            "confirmado",
+            "fallido"
+          ],
+          "default": "pendiente"
+        },
+        "comprobante_url": {
+          "type": "string",
+          "format": "text"
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        }
+      }
+    },
+    "devoluciones": {
+      "requeridasSegunAPI": [
+        "id",
+        "usuario_id",
+        "encargado_id",
+        "monto",
+        "procesado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "solicitud_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "solicitudes_devolucion",
+            "columna": "id"
+          }
+        },
+        "usuario_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "encargado_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "monto": {
+          "type": "number",
+          "format": "numeric"
+        },
+        "comprobante_url": {
+          "type": "string",
+          "format": "text"
+        },
+        "foto_usuario_url": {
+          "type": "string",
+          "format": "text"
+        },
+        "procesado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        }
+      }
+    },
+    "entradas": {
+      "requeridasSegunAPI": [
+        "id",
+        "compra_id",
+        "tipo_ticket_id",
+        "usuario_destino_id",
+        "codigo_qr",
+        "estado",
+        "creado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "compra_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "compras",
+            "columna": "id"
+          }
+        },
+        "tipo_ticket_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "tipos_ticket",
+            "columna": "id"
+          }
+        },
+        "usuario_destino_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "codigo_qr": {
+          "type": "string",
+          "format": "character varying",
+          "maxLength": 255
+        },
+        "estado": {
+          "type": "string",
+          "format": "public.estado_entrada",
+          "enum": [
+            "activa",
+            "usada",
+            "reportada",
+            "anulada"
+          ]
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        }
+      }
+    },
+    "eventos": {
+      "requeridasSegunAPI": [
+        "id",
+        "organizador_id",
+        "titulo",
+        "fecha_evento",
+        "tipo_acceso",
+        "estado",
+        "destacado_carrusel",
+        "creado_en",
+        "visible_landing",
+        "version_edicion"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "organizador_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "categoria_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "categorias_evento",
+            "columna": "id"
+          }
+        },
+        "titulo": {
+          "type": "string",
+          "format": "character varying",
+          "maxLength": 160
+        },
+        "descripcion": {
+          "type": "string",
+          "format": "text"
+        },
+        "foto_url": {
+          "type": "string",
+          "format": "text"
+        },
+        "ubicacion": {
+          "type": "string",
+          "format": "character varying",
+          "maxLength": 255
+        },
+        "mapa_url": {
+          "type": "string",
+          "format": "text"
+        },
+        "fecha_evento": {
+          "type": "string",
+          "format": "timestamp with time zone"
+        },
+        "tipo_acceso": {
+          "type": "string",
+          "format": "public.tipo_acceso_evento",
+          "enum": [
+            "qr_digital",
+            "qr_fisico"
+          ]
+        },
+        "estado": {
+          "type": "string",
+          "format": "public.estado_evento",
+          "enum": [
+            "borrador",
+            "pendiente_aprobacion",
+            "aprobado",
+            "publicado"
+          ]
+        },
+        "destacado_carrusel": {
+          "type": "boolean",
+          "format": "boolean",
+          "default": false
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        },
+        "fecha_fin": {
+          "type": "string",
+          "format": "timestamp with time zone"
+        },
+        "visible_landing": {
+          "type": "boolean",
+          "format": "boolean",
+          "default": true
+        },
+        "version_edicion": {
+          "type": "integer",
+          "format": "int64",
+          "default": 1
+        }
+      }
+    },
+    "intentos_compra_prueba": {
+      "requeridasSegunAPI": [
+        "usuario_id",
+        "solicitud_id",
+        "seleccion",
+        "respuesta",
+        "creado_en"
+      ],
+      "columnas": {
+        "usuario_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          },
+          "clavePrimaria": true
+        },
+        "solicitud_id": {
+          "type": "string",
+          "format": "uuid",
+          "clavePrimaria": true
+        },
+        "seleccion": {
+          "format": "jsonb"
+        },
+        "respuesta": {
+          "format": "jsonb"
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        }
+      }
+    },
+    "lotes_qr_fisico": {
+      "requeridasSegunAPI": [
+        "id",
+        "evento_id",
+        "cantidad",
+        "generado_por",
+        "generado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "evento_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "eventos",
+            "columna": "id"
+          }
+        },
+        "cantidad": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "generado_por": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "generado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        },
+        "solicitud_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "negocios": {
+      "requeridasSegunAPI": [
+        "id",
+        "dueno_id",
+        "nombre",
+        "estado",
+        "creado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "dueno_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "nombre": {
+          "type": "string",
+          "format": "character varying",
+          "maxLength": 120
+        },
+        "descripcion": {
+          "type": "string",
+          "format": "text"
+        },
+        "estado": {
+          "type": "boolean",
+          "format": "boolean",
+          "default": true
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        }
+      }
+    },
+    "productos": {
+      "requeridasSegunAPI": [
+        "id",
+        "negocio_id",
+        "nombre",
+        "precio",
+        "disponible"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "negocio_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "negocios",
+            "columna": "id"
+          }
+        },
+        "nombre": {
+          "type": "string",
+          "format": "character varying",
+          "maxLength": 120
+        },
+        "descripcion": {
+          "type": "string",
+          "format": "text"
+        },
+        "precio": {
+          "type": "number",
+          "format": "numeric"
+        },
+        "disponible": {
+          "type": "boolean",
+          "format": "boolean",
+          "default": true
+        }
+      }
+    },
+    "recargas": {
+      "requeridasSegunAPI": [
+        "id",
+        "recargador_id",
+        "usuario_id",
+        "evento_id",
+        "monto",
+        "creado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "recargador_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "usuario_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "evento_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "eventos",
+            "columna": "id"
+          }
+        },
+        "monto": {
+          "type": "number",
+          "format": "numeric"
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        }
+      }
+    },
+    "registros_acceso": {
+      "requeridasSegunAPI": [
+        "id",
+        "supervisor_id",
+        "entrada_id",
+        "resultado",
+        "registrado_en",
+        "observacion",
+        "eliminado",
+        "version"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "supervisor_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "entrada_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "entradas",
+            "columna": "id"
+          }
+        },
+        "resultado": {
+          "type": "string",
+          "format": "public.resultado_acceso",
+          "enum": [
+            "permitido",
+            "denegado"
+          ]
+        },
+        "foto_url": {
+          "type": "string",
+          "format": "text"
+        },
+        "registrado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        },
+        "solicitud_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "codigo_leido": {
+          "type": "string",
+          "format": "text"
+        },
+        "observacion": {
+          "type": "string",
+          "format": "text"
+        },
+        "eliminado": {
+          "type": "boolean",
+          "format": "boolean",
+          "default": false
+        },
+        "version": {
+          "type": "integer",
+          "format": "int32",
+          "default": 1
+        }
+      }
+    },
+    "reportes_acceso": {
+      "requeridasSegunAPI": [
+        "id",
+        "registro_acceso_id",
+        "usuario_id",
+        "descripcion",
+        "estado",
+        "creado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "registro_acceso_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "registros_acceso",
+            "columna": "id"
+          }
+        },
+        "usuario_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "descripcion": {
+          "type": "string",
+          "format": "text"
+        },
+        "estado": {
+          "type": "string",
+          "format": "public.estado_reporte",
+          "enum": [
+            "pendiente",
+            "solucionado"
+          ],
+          "default": "pendiente"
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        },
+        "solicitud_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "reportes_entrada": {
+      "requeridasSegunAPI": [
+        "id",
+        "entrada_id",
+        "usuario_id",
+        "descripcion",
+        "estado",
+        "creado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "entrada_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "entradas",
+            "columna": "id"
+          }
+        },
+        "usuario_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "descripcion": {
+          "type": "string",
+          "format": "text"
+        },
+        "estado": {
+          "type": "string",
+          "format": "public.estado_reporte",
+          "enum": [
+            "pendiente",
+            "solucionado"
+          ],
+          "default": "pendiente"
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        }
+      }
+    },
+    "reportes_recarga": {
+      "requeridasSegunAPI": [
+        "id",
+        "recarga_id",
+        "usuario_id",
+        "descripcion",
+        "estado",
+        "creado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "recarga_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "recargas",
+            "columna": "id"
+          }
+        },
+        "usuario_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "descripcion": {
+          "type": "string",
+          "format": "text"
+        },
+        "estado": {
+          "type": "string",
+          "format": "public.estado_reporte",
+          "enum": [
+            "pendiente",
+            "solucionado"
+          ],
+          "default": "pendiente"
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        }
+      }
+    },
+    "saldos_puntos": {
+      "requeridasSegunAPI": [
+        "id",
+        "usuario_id",
+        "evento_id",
+        "saldo"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "usuario_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "evento_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "eventos",
+            "columna": "id"
+          }
+        },
+        "saldo": {
+          "type": "number",
+          "format": "numeric",
+          "default": 0
+        }
+      }
+    },
+    "solicitudes_devolucion": {
+      "requeridasSegunAPI": [
+        "id",
+        "usuario_id",
+        "evento_id",
+        "monto_solicitado",
+        "qr_bancario_url",
+        "estado",
+        "creado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "usuario_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "evento_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "eventos",
+            "columna": "id"
+          }
+        },
+        "monto_solicitado": {
+          "type": "number",
+          "format": "numeric"
+        },
+        "qr_bancario_url": {
+          "type": "string",
+          "format": "text"
+        },
+        "estado": {
+          "type": "string",
+          "format": "public.estado_solicitud",
+          "enum": [
+            "en_revision",
+            "aprobada",
+            "rechazada"
+          ],
+          "default": "en_revision"
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        }
+      }
+    },
+    "solicitudes_organizador": {
+      "requeridasSegunAPI": [
+        "id",
+        "usuario_id",
+        "estado",
+        "solicitado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "usuario_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "estado": {
+          "type": "string",
+          "format": "public.estado_solicitud",
+          "enum": [
+            "en_revision",
+            "aprobada",
+            "rechazada"
+          ],
+          "default": "en_revision"
+        },
+        "solicitado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        },
+        "revisado_en": {
+          "type": "string",
+          "format": "timestamp with time zone"
+        },
+        "revisado_por": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "evento_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "eventos",
+            "columna": "id"
+          }
+        }
+      }
+    },
+    "tipos_ticket": {
+      "requeridasSegunAPI": [
+        "id",
+        "evento_id",
+        "nombre",
+        "precio",
+        "cantidad_disponible",
+        "limite_por_usuario",
+        "version_edicion"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "evento_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "eventos",
+            "columna": "id"
+          }
+        },
+        "nombre": {
+          "type": "string",
+          "format": "character varying",
+          "maxLength": 80
+        },
+        "descripcion": {
+          "type": "string",
+          "format": "text"
+        },
+        "precio": {
+          "type": "number",
+          "format": "numeric"
+        },
+        "cantidad_disponible": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "limite_por_usuario": {
+          "type": "integer",
+          "format": "int32",
+          "default": 1
+        },
+        "version_edicion": {
+          "type": "integer",
+          "format": "int64",
+          "default": 1
+        }
+      }
+    },
+    "usuarios": {
+      "requeridasSegunAPI": [
+        "id",
+        "nombre",
+        "correo",
+        "rol",
+        "creado_en",
+        "actualizado_en",
+        "activo"
+      ],
+      "columnas": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "clavePrimaria": true
+        },
+        "nombre": {
+          "type": "string",
+          "format": "character varying",
+          "maxLength": 120
+        },
+        "carnet_identidad": {
+          "type": "string",
+          "format": "character varying",
+          "maxLength": 20
+        },
+        "correo": {
+          "type": "string",
+          "format": "character varying",
+          "maxLength": 160
+        },
+        "rol": {
+          "type": "string",
+          "format": "public.rol_usuario",
+          "enum": [
+            "admin",
+            "cliente",
+            "recargador",
+            "supervisor",
+            "devolucion",
+            "negocio",
+            "ayudante",
+            "escaneador",
+            "organizador"
+          ]
+        },
+        "foto_perfil_url": {
+          "type": "string",
+          "format": "text"
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        },
+        "actualizado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        },
+        "activo": {
+          "type": "boolean",
+          "format": "boolean",
+          "default": true
+        }
+      }
+    },
+    "venta_items": {
+      "requeridasSegunAPI": [
+        "id",
+        "venta_id",
+        "producto_id",
+        "cantidad",
+        "precio_unitario"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "venta_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "ventas",
+            "columna": "id"
+          }
+        },
+        "producto_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "productos",
+            "columna": "id"
+          }
+        },
+        "cantidad": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "precio_unitario": {
+          "type": "number",
+          "format": "numeric"
+        }
+      }
+    },
+    "ventas": {
+      "requeridasSegunAPI": [
+        "id",
+        "ayudante_id",
+        "negocio_id",
+        "cliente_id",
+        "evento_id",
+        "total",
+        "creado_en"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "ayudante_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "ayudantes",
+            "columna": "id"
+          }
+        },
+        "negocio_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "negocios",
+            "columna": "id"
+          }
+        },
+        "cliente_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "evento_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "eventos",
+            "columna": "id"
+          }
+        },
+        "total": {
+          "type": "number",
+          "format": "numeric"
+        },
+        "comprobante_url": {
+          "type": "string",
+          "format": "text"
+        },
+        "creado_en": {
+          "type": "string",
+          "format": "timestamp with time zone",
+          "default": "now()"
+        }
+      }
+    },
+    "vinculos_qr_fisico": {
+      "requeridasSegunAPI": [
+        "id",
+        "lote_id",
+        "codigo_qr"
+      ],
+      "columnas": {
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "clavePrimaria": true
+        },
+        "lote_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "lotes_qr_fisico",
+            "columna": "id"
+          }
+        },
+        "codigo_qr": {
+          "type": "string",
+          "format": "character varying",
+          "maxLength": 255
+        },
+        "carnet_identidad": {
+          "type": "string",
+          "format": "character varying",
+          "maxLength": 50
+        },
+        "foto_carnet_url": {
+          "type": "string",
+          "format": "text"
+        },
+        "usuario_id": {
+          "type": "string",
+          "format": "uuid",
+          "referencia": {
+            "tabla": "usuarios",
+            "columna": "id"
+          }
+        },
+        "vinculado_en": {
+          "type": "string",
+          "format": "timestamp with time zone"
+        },
+        "entrada_id": {
+          "type": "integer",
+          "format": "int32",
+          "referencia": {
+            "tabla": "entradas",
+            "columna": "id"
+          }
+        }
+      }
+    }
+  },
+  "rpcs": {
+    "comprar_entradas": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_correo_destino": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_evento_id": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_lineas": {
+            "format": "jsonb"
+          }
+        },
+        "required": [
+          "p_evento_id",
+          "p_lineas"
+        ]
+      }
+    },
+    "comprar_entradas_prueba": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_correo_destino": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_evento_id": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_lineas": {
+            "format": "jsonb"
+          },
+          "p_resultado": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_solicitud_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "p_evento_id",
+          "p_lineas",
+          "p_correo_destino",
+          "p_solicitud_id",
+          "p_resultado"
+        ]
+      }
+    },
+    "consultar_lote_qr": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_lote": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "p_lote"
+        ]
+      }
+    },
+    "corregir_acceso": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_eliminar": {
+            "type": "boolean",
+            "format": "boolean"
+          },
+          "p_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "p_motivo": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_observacion": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_resultado": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_version": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "p_id",
+          "p_version",
+          "p_resultado",
+          "p_observacion",
+          "p_motivo"
+        ]
+      }
+    },
+    "eliminar_evento_sin_ventas": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_evento_id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "p_evento_id"
+        ]
+      }
+    },
+    "es_admin": {
+      "metodosExpuestos": [
+        "get",
+        "post"
+      ],
+      "argumentos": {
+        "type": "object"
+      }
+    },
+    "estadisticas_evento": {
+      "metodosExpuestos": [
+        "get",
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_evento_id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "p_evento_id"
+        ]
+      }
+    },
+    "evento_tiene_entradas": {
+      "metodosExpuestos": [
+        "get",
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_evento_id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "p_evento_id"
+        ]
+      }
+    },
+    "eventos_supervisor": {
+      "metodosExpuestos": [
+        "get",
+        "post"
+      ],
+      "argumentos": {
+        "type": "object"
+      }
+    },
+    "generar_lote_qr": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_cantidad": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "p_evento": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "p_solicitud": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "p_evento",
+          "p_cantidad",
+          "p_solicitud"
+        ]
+      }
+    },
+    "guardar_evento_completo": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_datos": {
+            "format": "jsonb"
+          },
+          "p_estado": {
+            "type": "string",
+            "format": "public.estado_evento"
+          },
+          "p_evento_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "p_organizador_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "p_tickets": {
+            "format": "jsonb"
+          }
+        },
+        "required": [
+          "p_evento_id",
+          "p_organizador_id",
+          "p_estado",
+          "p_datos",
+          "p_tickets"
+        ]
+      }
+    },
+    "historial_accesos": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_evento": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "p_fecha": {
+            "type": "string",
+            "format": "date"
+          },
+          "p_incluir_eliminados": {
+            "type": "boolean",
+            "format": "boolean"
+          },
+          "p_resultado": {
+            "type": "string",
+            "format": "text"
+          }
+        },
+        "required": [
+          "p_evento"
+        ]
+      }
+    },
+    "identificar_qr": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_codigo": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_evento": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "p_codigo",
+          "p_evento"
+        ]
+      }
+    },
+    "listar_reportes_admin": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_busqueda": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_estado": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_tipo": {
+            "type": "string",
+            "format": "text"
+          }
+        }
+      }
+    },
+    "qpass_autorizado_evento": {
+      "metodosExpuestos": [
+        "get",
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_evento": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "p_roles": {
+            "type": "array",
+            "format": "text[]"
+          }
+        },
+        "required": [
+          "p_evento",
+          "p_roles"
+        ]
+      }
+    },
+    "registrar_acceso": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_codigo": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_evento": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "p_foto": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_permitir": {
+            "type": "boolean",
+            "format": "boolean"
+          },
+          "p_solicitud": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "p_codigo",
+          "p_evento",
+          "p_permitir",
+          "p_foto",
+          "p_solicitud"
+        ]
+      }
+    },
+    "reportar_acceso": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_descripcion": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "p_solicitud": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "p_id",
+          "p_descripcion",
+          "p_solicitud"
+        ]
+      }
+    },
+    "resolver_reporte_admin": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "p_tipo": {
+            "type": "string",
+            "format": "text"
+          }
+        },
+        "required": [
+          "p_tipo",
+          "p_id"
+        ]
+      }
+    },
+    "resumen_dashboard": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_evento": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "vincular_manilla": {
+      "metodosExpuestos": [
+        "post"
+      ],
+      "argumentos": {
+        "type": "object",
+        "properties": {
+          "p_carnet": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_codigo": {
+            "type": "string",
+            "format": "text"
+          },
+          "p_entrada_codigo": {
+            "type": "string",
+            "format": "text"
+          }
+        },
+        "required": [
+          "p_codigo",
+          "p_entrada_codigo",
+          "p_carnet"
+        ]
+      }
+    }
+  },
+  "sqlLocalesSHA256": {
+    "compras_politicas_y_funcion.sql": "8e87b0bcd72a5ceb41418502d1b9f39ac0f37698d3240dbfd5245c6313dd5c79",
+    "devD_integracion_00_catalogo_solo_lectura.sql": "c9b788d0cb9a2463befa5cd63aee8c517743af099514df362deb8fbd3a9abe79",
+    "devD_integracion_10_historicos_ventas.BORRADOR.sql": "a9ca78d79dca6d1b40b344d9c9edd5f87b8329896f5a695d002f4fae5b0c574e",
+    "devD_integracion_20_verificacion_solo_lectura.sql": "8cb51b4818e4ba0b7d28e8d8664f3d62e275634f81ebef0148e012da0cfc02c2",
+    "mis_compras_politicas.sql": "08c49e215239a9ac2491d7dbedb0aed8e7ec780d9a425b2f7ebe3a1918aa03b6",
+    "politicas_eventos_publicos.sql": "bfb556c90e0678a3543410492c9040e331d21ed9c00d45d805d0e0fe7ed8bcdf",
+    "seed_eventos_prueba.sql": "264b80f26241e70791f519c3c32f37456cbb1cfed8401524fd57949b37606e1e",
+    "sprint2_devA_admin_eventos.sql": "72bc01ae51e658ca494ef3dcb74a513a3496bddf77ce09e53c6650f02681deb5",
+    "sprint2_devA_seed_solicitudes.sql": "d80de9154b187f0adc872bde041e79300cd2b1c5f75209326d55dfe10cd25e4b",
+    "sprint2_devC_usuarios.sql": "cf61ec5d0195e0a08862fc414508a156c808dc1bf6984cafb5cd08909f42fa2f",
+    "sprint2_devD_landing_categorias.sql": "5dd2a45eedf3cc3b28b3e0252269e761f814e70a11b4f43871dac37d1cec73f0",
+    "sprint2_devD_visible_landing.sql": "ef313b75745f8ad0d72426f48a20e15bb3db0129fa440ea353c685b735c946e3",
+    "sprint2_rol_organizador.sql": "d5c9416ee8a2522abf39cdf2cfc9937baddd5918388fec6b30cc9a1e9eb06a55",
+    "sprint3_devA_accesos.sql": "0ffa3a64c52dab2f9f6c98e5369e5f30c1395a29d12a431f7e255b1eead455dc",
+    "sprint3_devA_dashboards.sql": "a55a39afe480dfacb6b43bfcdaf9461a1a6a1fe25eacc8c13b93429d96d509cf",
+    "sprint3_devA_edicion_segura.sql": "4cbe1f3392481fa44646a5fd4a79f8a779ff0e9b4c5be0efa2ef5ff1f89653a0",
+    "sprint3_devA_pagos_prueba.sql": "223c6271368964373f45fe135e86694389ed12b24f1b4514db69de4337757e4b",
+    "sprint3_devA_qr.sql": "7d0a1038cd13126f46f1e45707882cddc188314dfe7aaf0c56f3d0300019774c",
+    "sprint3_devA_reportes.sql": "86ea1ee4b85c33adf356b4a137eebae1fc4caa6e5f9f1db277db1551b3c7de29",
+    "sprint3_devD_compra_terceros.sql": "8f513b8bb556c7afadadf5c3add311d01b8d793f4198887cb27b90956eb30b46",
+    "sprint3_devD_reportes_entrada.sql": "2c5b92511010449d1f98715cf81fa7f1d9cf5b75e56632f23606f4cd5f25da98"
+  }
+}
