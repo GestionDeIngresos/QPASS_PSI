@@ -53,10 +53,10 @@ export default async function SolicitudesPage() {
     : null
   const urlsMap = new Map(firmadas?.data?.map((v) => [v.path, v.signedUrl]) ?? [])
 
-  const solicitudes: SolicitudEncargado[] = unidas.map((s) => ({
-    ...s,
-    urlFirmada: s.qrRuta ? (urlsMap.get(s.qrRuta) ?? undefined) : undefined,
-  }))
+  const solicitudes: SolicitudEncargado[] = unidas.map((s) => {
+    const { qrRuta, ...resto } = s
+    return { ...resto, urlFirmada: qrRuta ? (urlsMap.get(qrRuta) ?? undefined) : undefined }
+  })
 
   return (
     <div className="min-h-screen bg-[#05050A] px-4 py-10 sm:px-6 sm:py-14">

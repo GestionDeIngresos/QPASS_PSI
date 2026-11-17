@@ -9,7 +9,6 @@ export type SolicitudEncargado = {
   correo: string
   monto: string
   creadoEn: string
-  qrRuta: string
   eventoId: number
   eventoTitulo: string
   urlFirmada?: string

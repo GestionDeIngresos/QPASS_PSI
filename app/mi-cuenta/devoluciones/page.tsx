@@ -8,6 +8,8 @@ import {
   type SolicitudDevolucion,
 } from './DevolucionesCliente'
 
+type SolicitudRaw = SolicitudDevolucion & { qrRuta: string }
+
 export const metadata: Metadata = { title: 'Mis Devoluciones · QPass' }
 
 const INPUT_DATE =
@@ -39,7 +41,7 @@ export default async function DevolucionesPage({
   ])
 
   let eventos = (eventosResult.data ?? []) as EventoDevolucion[]
-  const solicitudesRaw = (solicitudesResult.data ?? []) as SolicitudDevolucion[]
+  const solicitudesRaw = (solicitudesResult.data ?? []) as SolicitudRaw[]
 
   // Filtros aplicados en el servidor sobre el resultado de la RPC
   if (q) {
@@ -47,11 +49,11 @@ export default async function DevolucionesPage({
     eventos = eventos.filter((e) => e.titulo.toLowerCase().includes(ql))
   }
   if (desde) {
-    const fi = new Date(desde)
+    const fi = new Date(`${desde}T00:00:00-04:00`)
     eventos = eventos.filter((e) => !e.fechaFin || new Date(e.fechaFin) >= fi)
   }
   if (hasta) {
-    const ff = new Date(hasta + 'T23:59:59')
+    const ff = new Date(`${hasta}T23:59:59.999-04:00`)
     eventos = eventos.filter((e) => e.fechaFin != null && new Date(e.fechaFin) <= ff)
   }
 
@@ -62,10 +64,10 @@ export default async function DevolucionesPage({
     : null
   const urlsMap = new Map(firmadas?.data?.map((v) => [v.path, v.signedUrl]) ?? [])
 
-  const solicitudes: SolicitudDevolucion[] = solicitudesRaw.map((s) => ({
-    ...s,
-    urlFirmada: s.qrRuta ? (urlsMap.get(s.qrRuta) ?? undefined) : undefined,
-  }))
+  const solicitudes: SolicitudDevolucion[] = solicitudesRaw.map((s) => {
+    const { qrRuta, ...resto } = s
+    return { ...resto, urlFirmada: qrRuta ? (urlsMap.get(qrRuta) ?? undefined) : undefined }
+  })
 
   return (
     <div className="min-h-screen bg-[#05050A] px-4 py-10 sm:px-6 sm:py-14">

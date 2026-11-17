@@ -19,7 +19,6 @@ export type SolicitudDevolucion = {
   monto: string
   estado: 'en_revision' | 'aprobada' | 'rechazada'
   creadoEn: string
-  qrRuta: string
   urlFirmada?: string
 }
 
