@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { aceptarSolicitud } from './actions'
+import { useRouter } from 'next/navigation'
 
 export type SolicitudEncargado = {
   id: number
@@ -27,6 +28,7 @@ export function SolicitudesCliente({
   const [mensajeAccion, setMensajeAccion] = useState<MensajeAccion | null>(null)
   const [pendiente, startTransition] = useTransition()
   const [aceptandoId, setAceptandoId] = useState<number | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     if (!modal) return
@@ -36,11 +38,13 @@ export function SolicitudesCliente({
   }, [modal])
 
   function aceptar(s: SolicitudEncargado) {
+    if (!window.confirm(`¿Registrar una devolución SIMULADA de ${s.monto} puntos? No se realizará una transferencia bancaria.`)) return
     setAceptandoId(s.id)
     setMensajeAccion(null)
     startTransition(async () => {
       const r = await aceptarSolicitud(s.id)
-      setMensajeAccion({ solicitudId: s.id, texto: r.error })
+      setMensajeAccion({ solicitudId: s.id, texto: r.error ?? `Devolución simulada registrada: ${r.referencia}.` })
+      if (r.ok) router.refresh()
       setAceptandoId(null)
     })
   }

@@ -9,7 +9,8 @@ export type PerfilMenu = { nombre: string; correo: string; rol: string }
 // ─── ZONA EDITABLE: enlaces según el rol (HU 5) ──────────────────
 // /admin es de Dev A; /organizador/* es de Dev B.
 const ENLACES_POR_ROL: Record<string, { href: string; etiqueta: string }[]> = {
-  admin: [{ href: '/admin', etiqueta: 'Panel de administración' }],
+  admin: [{ href: '/admin', etiqueta: 'Panel de administración' }, { href: '/recargador', etiqueta: 'Recargas' }, { href: '/devolucion', etiqueta: 'Devoluciones' }],
+  recargador: [{ href: '/recargador', etiqueta: 'Panel de recargador' }],
   supervisor: [{ href: '/supervisor', etiqueta: 'Control de acceso' }],
   ayudante: [{ href: '/ayudante', etiqueta: 'Panel de ayudante' }],
   organizador: [
@@ -17,12 +18,14 @@ const ENLACES_POR_ROL: Record<string, { href: string; etiqueta: string }[]> = {
     { href: '/organizador/eventos', etiqueta: 'Mis eventos' },
   ],
   negocio: [{ href: '/negocio', etiqueta: 'Panel de negocio' }],
-  devolucion: [{ href: '/devolucion/solicitudes', etiqueta: 'Solicitudes virtuales' }],
+  devolucion: [{ href: '/devolucion', etiqueta: 'Devolución presencial' }, { href: '/devolucion/solicitudes', etiqueta: 'Solicitudes virtuales' }],
 }
 const ENLACES_COMUNES = [
   { href: '/', etiqueta: 'Inicio' },
   { href: '/eventos', etiqueta: 'Explorar eventos' },
   { href: '/mis-compras', etiqueta: 'Mis compras' },
+  { href: '/mi-cuenta/saldos', etiqueta: 'Mis saldos' },
+  { href: '/mi-cuenta/ticket-extraviado', etiqueta: 'Ticket extraviado' },
   { href: '/mi-cuenta/devoluciones', etiqueta: 'Mis devoluciones' },
   { href: '/mi-cuenta/perfil', etiqueta: 'Editar perfil' },
 ]

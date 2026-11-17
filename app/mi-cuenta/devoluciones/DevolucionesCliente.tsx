@@ -19,6 +19,8 @@ export type SolicitudDevolucion = {
   monto: string
   estado: 'en_revision' | 'aprobada' | 'rechazada'
   creadoEn: string
+  liquidada?: boolean
+  cancelada?: boolean
   urlFirmada?: string
 }
 
@@ -168,7 +170,7 @@ export function DevolucionesCliente({
 
   const eventosPendientes = new Set(
     solicitudes
-      .filter((s) => s.estado === 'en_revision' || s.estado === 'aprobada')
+      .filter((s) => s.estado === 'en_revision' || (s.estado === 'aprobada' && !s.liquidada))
       .map((s) => s.eventoId)
   )
 
@@ -224,10 +226,19 @@ export function DevolucionesCliente({
     }
     const fd = new FormData(e.currentTarget) // incluye el input hidden eventoId
     fd.set('archivo', selectedFile, selectedFile.name)
+    const intentoKey = `qpass:devb:virtual:${modal?.eventoId}`
+    try {
+      const solicitud = sessionStorage.getItem(intentoKey) ?? crypto.randomUUID()
+      sessionStorage.setItem(intentoKey, solicitud)
+      fd.set('solicitud', solicitud)
+    } catch { setLocalError('Habilita el almacenamiento de la pestaña para conservar el intento.'); return }
     setLocalError(null)
     startTransition(async () => {
-      const r = await solicitarDevolucion(fd)
+      let r
+      try { r = await solicitarDevolucion(fd) }
+      catch { setLocalError('Resultado desconocido. Reintenta con la misma imagen o revisa Mis solicitudes.'); return }
       if (r?.ok) {
+        sessionStorage.removeItem(intentoKey)
         setModal(null)
         setSelectedFile(null)
         setPreview(null)
