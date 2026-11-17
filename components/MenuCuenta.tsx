@@ -21,6 +21,7 @@ const ENLACES_COMUNES = [
   { href: '/', etiqueta: 'Inicio' },
   { href: '/eventos', etiqueta: 'Explorar eventos' },
   { href: '/mis-compras', etiqueta: 'Mis compras' },
+  { href: '/mi-cuenta/devoluciones', etiqueta: 'Mis devoluciones' },
   { href: '/mi-cuenta/perfil', etiqueta: 'Editar perfil' },
 ]
 // ─────────────────────────────────────────────────────────────────
