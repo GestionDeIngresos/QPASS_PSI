@@ -2,6 +2,8 @@
 
 > QA posterior: [DEV_B_REPORTE_FINAL.md](DEV_B_REPORTE_FINAL.md) registra las pruebas reales y correcciones. `scripts/fixtures/devb-desarrollo.json` configura Bs1=1 punto solo en pruebas aisladas; no se añadió una tasa predeterminada a producción. Los intentos con un primer envío incierto conservan su UUID incluso si después reciben un rechazo.
 
+> Decisión posterior del equipo: **Bs 1 = 1 punto** es la regla confirmada del proyecto. La fixture anterior conserva su etiqueta histórica de prueba. Para habilitar operaciones en Supabase falta desplegar B y configurar `bs_por_punto=1.000000` por evento autorizado; la configuración no modifica históricos ni acredita puntos. El plazo de devolución de la fixture no constituye un plazo oficial. Estado vigente del despliegue: [DEV_B_DESPLIEGUE_SEGURO.md](DEV_B_DESPLIEGUE_SEGURO.md).
+
 ## Contrato vigente encontrado
 
 - A: `identificar_qr(p_codigo text,p_evento integer) -> jsonb`, autoriza supervisor/recargador/ayudante por evento, más admin; `identificacionValida` admite entrada usada y pago confirmado. `LectorQr`, `AccionesCuenta`, guards y reportes admin se reutilizan.
@@ -35,7 +37,7 @@ Confirmación: `{id:number, referencia:string, puntos:string, importe:string, sa
 - PostgreSQL `numeric(10,2)` para dinero/puntos. Navegador y Server Actions envían decimales como texto, sin aritmética monetaria con float. Tasas `numeric(16,6)` en Bs por punto.
 - `recargas.monto`: importe simulado en Bs para nuevos registros; `puntos` y `tasa` guardan conversión histórica. No se reinterpretan los montos ni se inventan tasas para recargas heredadas; sus columnas nuevas son null y no admiten ajuste automático.
 - `devoluciones.monto`: puntos, compatible con `monto_solicitado` C; columnas nuevas `importe_simulado` y `tasa` guardan su equivalencia simulada. `evento_id` se añade para presenciales. Históricos no relacionados con solicitud conservan evento desconocido, sin inferirlo.
-- `devb_conversion` no contiene filas predeterminadas. Sin acuerdo por evento: `CONVERSION_NO_CONFIGURADA`. Una conversión que no sea exacta a 2 decimales devuelve `CONVERSION_INEXACTA`; no se escoge unilateralmente una política de redondeo.
+- La regla confirmada es Bs 1 = 1 punto. `devb_conversion` no contiene filas predeterminadas: se debe configurar `bs_por_punto=1.000000` por evento después del despliegue autorizado. Sin esa fila: `CONVERSION_NO_CONFIGURADA`. Una conversión que no sea exacta a 2 decimales devuelve `CONVERSION_INEXACTA`; se conserva la validación de precisión.
 - Precio de productos D continúa en puntos. La venta no necesita conocer Bs/punto y no fue reescrita.
 
 ## Saldo, reservas y liquidación
@@ -78,12 +80,12 @@ Operaciones simuladas exclusivamente. No hay proveedor bancario, pago verificado
 2. Revisar copia de seguridad y catálogo del destino, incluidos writers privilegiados y políticas Storage ajenas. Este trabajo no leyó ni modificó Supabase remoto. El catálogo exportado usado por los tests es histórico.
 3. Aplicar una sola vez `supabase/migrations/202611170001_devb_saldos.sql`. Su transacción aborta ante prerequisitos ausentes, duplicados de liquidación heredados o colisiones de esquema; no los corrige borrando datos. Conservar el orden: no reaplicar scripts antiguos de C/D después, pues redefinen funciones que B extiende.
 4. Ejecutar `supabase/verificacion_devb_saldos.sql` (solo lectura). Usar este cálculo de reservas posterior a B; las comprobaciones históricas D que no conocen liquidada_en son anteriores al nuevo contrato.
-5. Con una tasa ACORDADA por el equipo, configurar cada evento desde SQL administrativo; sin defaults:
+5. Configurar cada evento autorizado con la tasa confirmada por el equipo, Bs 1 = 1 punto, desde SQL administrativo; sin modificar históricos:
 
 ```sql
 -- Sustituir los tres valores por los acordados; no ejecutar marcadores literalmente.
 insert into public.devb_conversion(evento_id,bs_por_punto,acuerdo)
-values (:evento_id, :bs_por_punto, :referencia_del_acuerdo)
+values (:evento_id, 1.000000, :referencia_del_acuerdo)
 on conflict(evento_id) do update set bs_por_punto=excluded.bs_por_punto,
   acuerdo=excluded.acuerdo,actualizado_en=now();
 ```
@@ -92,7 +94,7 @@ on conflict(evento_id) do update set bs_por_punto=excluded.bs_por_punto,
 
 ## Pendientes reales
 
-- Equipo: acuerdo explícito de Bs/punto por evento, política ante conversiones inexactas y plazo C. No se inventó ninguno.
+- Equipo: Bs 1 = 1 punto confirmado; pendiente su configuración por evento tras desplegar B. Confirmar plazo C y conservar la validación de precisión, sin modificar históricos.
 - Despliegue: aplicar B en el entorno real y verificar catálogo/Storage/RLS reales; no se usaron credenciales administrativas.
 - Entorno: concurrencia PostgreSQL local ya aprobada en QA; cámara real, API Storage y navegación autenticada aún deben comprobarse con dispositivos/cuentas de prueba.
 - D/A/C: APIs y pantallas existentes conservadas. No falta nuevo código de ellos para conectar los módulos implementados, pero su SQL previo debe estar instalado. La tarjeta de ventas del negocio y otras HUs ajenas quedan fuera de alcance.

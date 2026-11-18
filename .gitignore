@@ -23,6 +23,21 @@
 # misc
 .DS_Store
 *.pem
+*.pfx
+*.p12
+
+# Local credentials and private database exports
+.env*
+!.env.example
+!.env.sample
+.pgpass
+pgpass.conf
+pg_service.conf
+*.dump
+*.backup
+/backups/
+/QPass-Backups/
+/supabase/.temp/
 
 # debug
 npm-debug.log*
