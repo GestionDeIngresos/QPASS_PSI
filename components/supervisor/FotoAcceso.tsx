@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 const boton = 'rounded-lg border border-border px-4 py-2 text-sm font-semibold text-white transition hover:border-pink disabled:opacity-40'
 
-export function FotoAcceso({ onFoto, onPreparando, disabled = false }: { onFoto: (foto: File) => void; onPreparando?: (valor: boolean) => void; disabled?: boolean }) {
+export function FotoAcceso({ onFoto, onPreparando, disabled = false, maxBytes = 5242880, titulo = 'Foto del momento', contexto = 'el acceso' }: { onFoto: (foto: File) => void; onPreparando?: (valor: boolean) => void; disabled?: boolean; maxBytes?: number; titulo?: string; contexto?: string }) {
   const video = useRef<HTMLVideoElement>(null)
   const archivo = useRef<HTMLInputElement>(null)
   const [camara, setCamara] = useState(false)
@@ -39,8 +39,8 @@ export function FotoAcceso({ onFoto, onPreparando, disabled = false }: { onFoto:
   }, [camara, disabled])
 
   function elegir(foto: File) {
-    if (foto.size === 0 || foto.size > 5242880 || !['image/jpeg', 'image/png', 'image/webp'].includes(foto.type)) {
-      setError('Elige una imagen JPG, PNG o WEBP de hasta 5 MB.'); return
+    if (foto.size === 0 || foto.size > maxBytes || !['image/jpeg', 'image/png', 'image/webp'].includes(foto.type)) {
+      setError(`Elige una imagen JPG, PNG o WEBP de hasta ${maxBytes / 1048576} MB.`); return
     }
     setError(''); setPreview({ url: URL.createObjectURL(foto), nombre: foto.name })
     setCamara(false); setLista(false); onFoto(foto)
@@ -73,20 +73,20 @@ export function FotoAcceso({ onFoto, onPreparando, disabled = false }: { onFoto:
   }
 
   return <div className="space-y-3 rounded-xl border border-border bg-bg/50 p-4">
-    <p className="text-sm font-semibold">Foto del momento</p>
+    <p className="text-sm font-semibold">{titulo}</p>
     <div className="flex flex-wrap gap-3">
       <button type="button" disabled={disabled || capturando} onClick={() => { setError(''); setLista(false); setCamara(v => !v) }} className={boton}>{camara ? 'Cerrar cámara' : preview ? 'Tomar otra foto' : 'Abrir cámara'}</button>
       <button type="button" disabled={disabled || capturando} onClick={() => archivo.current?.click()} className={boton}>Elegir foto existente</button>
     </div>
     <input ref={archivo} type="file" accept="image/jpeg,image/png,image/webp" disabled={disabled || capturando} className="hidden" aria-label="Elegir foto existente" onChange={e => { const f = e.target.files?.[0]; if (f) elegir(f); e.target.value = '' }}/>
-    {camara && !disabled && <div className="space-y-3"><video ref={video} muted playsInline onLoadedData={() => setLista(true)} className="max-h-80 w-full rounded-lg bg-black" aria-label="Vista de cámara para foto del acceso"/><button type="button" disabled={!lista || capturando} onClick={capturar} className="rounded-lg bg-pink px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40">{capturando ? 'Capturando…' : 'Tomar foto'}</button></div>}
+    {camara && !disabled && <div className="space-y-3"><video ref={video} muted playsInline onLoadedData={() => setLista(true)} className="max-h-80 w-full rounded-lg bg-black" aria-label={`Vista de cámara para registrar ${contexto}`}/><button type="button" disabled={!lista || capturando} onClick={capturar} className="rounded-lg bg-pink px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40">{capturando ? 'Capturando…' : 'Tomar foto'}</button></div>}
     {preview && <div className="space-y-2">
       {/* La URL es local al navegador; la imagen se sube al confirmar el acceso. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={preview.url} alt="Foto seleccionada para registrar el acceso" className="max-h-64 w-full rounded-lg object-contain"/>
+      <img src={preview.url} alt={`Foto seleccionada para registrar ${contexto}`} className="max-h-64 w-full rounded-lg object-contain"/>
       <p className="break-all text-xs text-muted">{preview.nombre}</p>
     </div>}
     {error && <p role="alert" className="text-sm text-pink">{error}</p>}
-    <p className="text-xs text-muted">JPG, PNG o WEBP · máximo 5 MB. Puedes reemplazarla antes de confirmar el acceso.</p>
+    <p className="text-xs text-muted">JPG, PNG o WEBP · máximo {maxBytes / 1048576} MB. Puedes reemplazarla antes de confirmar {contexto}.</p>
   </div>
 }

@@ -17,6 +17,7 @@ export default function RegisterPage() {
   })
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [confirmationRequired, setConfirmationRequired] = useState(false)
   const [loading, setLoading] = useState(false)
 
   function update(field: keyof typeof form) {
@@ -31,27 +32,42 @@ export default function RegisterPage() {
     if (form.password !== form.confirmPassword) return setError('Las contraseñas no coinciden.')
 
     setLoading(true)
-    const { error } = await supabase.auth.signUp({
-      email: form.correo,
-      password: form.password,
-      options: {
-        data: { nombre: `${form.nombres} ${form.apellidos}`.trim(), carnet_identidad: form.ci },
-      },
-    })
-    setLoading(false)
-
-    if (error) {
-      setError(error.message === 'User already registered' ? 'Ya existe una cuenta con ese correo.' : 'No pudimos crear tu cuenta.')
-      return
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: form.correo,
+        password: form.password,
+        options: {
+          data: { nombre: `${form.nombres} ${form.apellidos}`.trim(), carnet_identidad: form.ci },
+        },
+      })
+      if (error) {
+        if (error.code === 'user_already_exists' || error.message === 'User already registered') {
+          setError('Ya existe una cuenta con ese correo.')
+        } else if (error.code === 'signup_disabled') {
+          setError('El registro de cuentas está deshabilitado en este momento.')
+        } else if (error.status === 429) {
+          setError('Demasiados intentos. Espera unos minutos antes de volver a intentar.')
+        } else if (error.name === 'AuthRetryableFetchError' || error.status === 0 || (error.status !== undefined && error.status >= 500)) {
+          setError('No pudimos conectar con el servicio de registro. Inténtalo de nuevo.')
+        } else {
+          setError('No pudimos crear tu cuenta. Revisa los datos e inténtalo de nuevo.')
+        }
+        return
+      }
+      setConfirmationRequired(!data.session)
+      setSuccess(true)
+      setTimeout(() => router.push(data.session ? '/eventos' : '/login'), 2500)
+    } catch {
+      setError('No pudimos conectar con el servicio de registro. Inténtalo de nuevo.')
+    } finally {
+      setLoading(false)
     }
-    setSuccess(true)
-    setTimeout(() => router.push('/login'), 2500)
   }
 
   if (success) {
     return (
-      <AuthCard title="¡Cuenta creada!" subtitle="Revisa tu correo para confirmar tu cuenta.">
-        <p className="text-center text-sm text-muted">Te redirigiremos al inicio de sesión...</p>
+      <AuthCard title="¡Cuenta creada!" subtitle={confirmationRequired ? 'Revisa tu correo para confirmar tu cuenta.' : 'Tu cuenta ya está activa.'}>
+        <p className="text-center text-sm text-muted">{confirmationRequired ? 'Te redirigiremos al inicio de sesión...' : 'Te redirigiremos a los eventos...'}</p>
       </AuthCard>
     )
   }
