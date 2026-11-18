@@ -1,0 +1,122 @@
+{
+  "rama": "Aliaga",
+  "estado": "propuesta-local-no-aplicada-remoto",
+  "archivos": [
+    {
+      "archivo": "app/ayudante/historial/page.tsx",
+      "sha256": "120d67474eb6ede0777c199ee56294fc5511b751c41f222108c3daa83b6a6be6"
+    },
+    {
+      "archivo": "app/ayudante/ventas/nueva/actions.ts",
+      "sha256": "69b4e55ba1cbe5c3720f95639a1c83e61ffcae4d2ec744b586ab0c491d4b56da"
+    },
+    {
+      "archivo": "app/ayudante/ventas/nueva/page.tsx",
+      "sha256": "cc7611b963c4c64cd3ae08a2bfb90c19fb2f495ece37d8aa72574e18bd4e4576"
+    },
+    {
+      "archivo": "components/ayudante/CatalogoCarrito.tsx",
+      "sha256": "6cd50ad6acb986eb4ced329e7b85c0ba88ab9dda7d076cc43239b654be42ad07"
+    },
+    {
+      "archivo": "components/ayudante/HistorialVentas.tsx",
+      "sha256": "ab8ce4da4c36691ef126f36a1b7e39add9f0c5560f7e3e4604e0036e1a7f7b6e"
+    },
+    {
+      "archivo": "components/ayudante/VentaIntegrada.tsx",
+      "sha256": "279769d10e2c178a0f55fe26c29948e4af7779b79e2d2054aa0eff62955c5e05"
+    },
+    {
+      "archivo": "docs/integracion-supabase/ENTREGA_REAL_DEVD_2026-11-16.md",
+      "sha256": "9c90837fcd0da7a6c96143f3c6718eaf0694a5d4b6b7d87b7c4555d0ef9b10fd"
+    },
+    {
+      "archivo": "docs/integracion-supabase/auditoria-catalogo-devd.json",
+      "sha256": "993c90af53518bf0cab8fbbcb20f7244980c5e5023e0c0385a7b8ce1e691fb46"
+    },
+    {
+      "archivo": "docs/integracion-supabase/qpass_catalogo_supabase_2026-11-16.json",
+      "sha256": "dbee7ad1fa7f95ea7741d7e61eca365f174caa1087adc781f58c9718574c4a07"
+    },
+    {
+      "archivo": "lib/ayudante/catalogo-server.ts",
+      "sha256": "f5169ac532ae353f1a6d5287ea8b9d7f8da00b92d743a06fa5905d456df41024"
+    },
+    {
+      "archivo": "lib/ayudante/cobro.ts",
+      "sha256": "8248415c20a55aea578cad8fb5573a0ceeed760dc18c05d53f54e63b4223fcb0"
+    },
+    {
+      "archivo": "lib/ayudante/comercio-server.ts",
+      "sha256": "09a45499cce3e0f249f6d08ac9857f78473cd9f42ed36ea4c01a82a3e63d72e2"
+    },
+    {
+      "archivo": "lib/ayudante/contracts.ts",
+      "sha256": "e09fb9618152e02d44cc6498a57ef69708ba6be64f03d9783b8732b39a8ef747"
+    },
+    {
+      "archivo": "lib/ayudante/ventas-server.ts",
+      "sha256": "d89916f00ec89a680bb1ed48aa01d9f9781fa6b75fe9888263e3dfc6b76e918f"
+    },
+    {
+      "archivo": "lib/ayudante/ventas-types.ts",
+      "sha256": "619932b4f452bad53919dcf7717eb6fb2f992ecea52aad09eea89ddb4b9cbc16"
+    },
+    {
+      "archivo": "scripts/auditar-catalogo-devd.cjs",
+      "sha256": "4cac7c342a9a0d4a9cfa3d9780ae77d2272b4b82ec80a5dbe419905164f84959"
+    },
+    {
+      "archivo": "scripts/devd-catalogo-fixture.cjs",
+      "sha256": "d7e0684eb3489ea366c30ec232d151740bc3a4be0a0d87435ac5f5831b5b3f96"
+    },
+    {
+      "archivo": "scripts/validar-base-ayudante.cjs",
+      "sha256": "a960d80c5f5ad0ad527414d4c15f15320b7921a8d932a1fe467e38fb73bfe421"
+    },
+    {
+      "archivo": "scripts/validar-comercio-app-devd.cjs",
+      "sha256": "aab9f5a28c79a8ca5b175d40eabcbc0cf07de4c9759c55e86454387f46c3404e"
+    },
+    {
+      "archivo": "scripts/validar-concurrencia-devd.cjs",
+      "sha256": "e2d89c47f03acfdc8506f0097f4fc4d4f81e42b208a8c88af39209a4c8dcbcfc"
+    },
+    {
+      "archivo": "scripts/validar-guardas-comercio-devd.cjs",
+      "sha256": "23af628a9a18a77bb1e37ddec4a697b5e537f8fba39c9c13dc46181407b7efb8"
+    },
+    {
+      "archivo": "scripts/validar-integracion-real-devd.cjs",
+      "sha256": "b54b14fcbef08e9044bc3a18baab847f79758fea9c6d5ddaebf0745efec6d7f9"
+    },
+    {
+      "archivo": "scripts/validar-lecturas-ventas.cjs",
+      "sha256": "6159df732a444fb2565db21ba15859746aace54b1581443df83772d684f41110"
+    },
+    {
+      "archivo": "supabase/devD_integracion_30_verificacion_real_solo_lectura.sql",
+      "sha256": "39983c235e31b93d6c2f02a2697c2d08a81a69e1b2acf7aca207a2f0af9d9620"
+    },
+    {
+      "archivo": "supabase/migrations/202611160000_devd_precondiciones.sql",
+      "sha256": "308743cbb6d23ae2493507dd53a57c2c0f70e2184f315743b3b9bc95b24229d1"
+    },
+    {
+      "archivo": "supabase/migrations/202611160001_devd_hu9.sql",
+      "sha256": "7940f6f925205b3c62c8c35fe43900ac078c890ef6cd310ae3f0f40093260587"
+    },
+    {
+      "archivo": "supabase/migrations/202611160002_devd_hu14.sql",
+      "sha256": "8276a7ce42cfd2af616a52ba68d1cd7965cabdbd3dc71f002d3a82bb91e3f1f0"
+    },
+    {
+      "archivo": "supabase/migrations/202611160003_devd_comercio_base.sql",
+      "sha256": "7e67622b1c9749996aea1bb472392070a58e0a641ad830ba53dc8850d413aa22"
+    },
+    {
+      "archivo": "supabase/migrations/202611160004_devd_comercio_rpc.sql",
+      "sha256": "1aa6ab0da41430431fdb8a559a3707f23c98016c5e44626dff807421d291feb9"
+    }
+  ]
+}

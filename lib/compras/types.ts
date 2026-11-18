@@ -33,7 +33,7 @@ export type ResultadoCompra =
       subtotal: number
       cargos: number
       total: number
-      /** nombre del destinatario; null si compró para sí mismo */
+      /** Etiqueta genérica del destinatario; null si compró para sí mismo. */
       destinatario: string | null
     }
   | {

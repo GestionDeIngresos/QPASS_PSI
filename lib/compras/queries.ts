@@ -1,4 +1,4 @@
-import type { CompraConEntradas, EntradaConEvento } from "../../types/compras";
+import type { CompraConEntradas, CompraPagada, EntradaConEvento } from "../../types/compras";
 import { MOCK_COMPRA, MOCK_ENTRADAS } from "./mock";
 import { obtenerSesionActual } from '@/lib/auth/sesion';
 
@@ -52,12 +52,14 @@ function normalizar(row: any): EntradaConEvento | null {
 /** Usuario autenticado o null (las páginas deciden el redirect). */
 export async function getUsuarioActual() {
   if (USE_MOCK) return { id: "mock-user" };
-  return (await obtenerSesionActual())?.user ?? null;
+  const sesion = await obtenerSesionActual();
+  return sesion?.perfil?.activo === true ? sesion.user : null;
 }
 
 /** Entradas asignadas al usuario (usuario_destino_id). La RLS es la segunda barrera de seguridad. */
 export async function getMisEntradas(userId: string): Promise<EntradaConEvento[]> {
   if (USE_MOCK) return MOCK_ENTRADAS;
+  if ((await getUsuarioActual())?.id !== userId) throw new Error('No tienes permisos para consultar estas entradas.');
   const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("entradas")
@@ -69,28 +71,52 @@ export async function getMisEntradas(userId: string): Promise<EntradaConEvento[]
 }
 
 export async function getCompra(compraId: string): Promise<CompraConEntradas | null> {
-  if (USE_MOCK) return MOCK_COMPRA;
+  if (USE_MOCK) return {
+    ...MOCK_COMPRA,
+    entradas: MOCK_COMPRA.entradas.map(({ id, compra_id, estado, creado_en, tipo_ticket, evento }) => ({ id, compra_id, estado, creado_en, tipo_ticket: { ...tipo_ticket, precio: null }, evento })),
+    para_terceros: false,
+  };
+  if (!await getUsuarioActual()) return null;
   const supabase = await getSupabase();
-  const { data: compra, error } = await supabase
-    .from("compras")
-    .select("id, subtotal, cargos_servicio, total, estado_pago, comprobante_url, creado_en")
-    .eq("id", compraId)
-    .maybeSingle();
+  // SECURITY DEFINER con comprobación explícita de comprador/activo; no devuelve QR.
+  const { data: compra, error } = await supabase.rpc('consultar_compra_propia', { p_compra_id: compraId });
   if (error) throw new Error(`No se pudo cargar la compra: ${error.message}`);
-  if (!compra) return null; // no existe o no es tuya (RLS)
-
-  const { data: filas, error: e2 } = await supabase
-    .from("entradas")
-    .select(ENTRADA_SELECT)
-    .eq("compra_id", compraId)
-    .order("creado_en", { ascending: true });
-  if (e2) throw new Error(`No se pudieron cargar las entradas: ${e2.message}`);
+  if (!compra) return null; // La RPC comprueba explícitamente comprador y cuenta activa.
 
   return {
-    ...compra,
+    // DTO explícito: una respuesta antigua/ampliada de la RPC no debe filtrar QR.
+    id: String(compra.id),
     subtotal: Number(compra.subtotal),
     cargos_servicio: Number(compra.cargos_servicio),
     total: Number(compra.total),
-    entradas: (filas ?? []).map(normalizar).filter((e): e is EntradaConEvento => e !== null),
+    estado_pago: compra.estado_pago,
+    comprobante_url: compra.comprobante_url,
+    creado_en: compra.creado_en,
+    para_terceros: compra.para_terceros === true,
+    // También neutralizar respuestas de una versión anterior de la RPC.
+    // Sin snapshot confirmado no se puede mostrar un precio del catálogo como histórico.
+    entradas: (compra.entradas ?? []).map((e: CompraConEntradas['entradas'][number]) => ({
+      id: String(e.id), compra_id: String(e.compra_id), estado: e.estado, creado_en: e.creado_en,
+      tipo_ticket: { id: String(e.tipo_ticket.id), nombre: e.tipo_ticket.nombre, precio: null },
+      evento: {
+        id: String(e.evento.id), titulo: e.evento.titulo, foto_url: e.evento.foto_url,
+        ubicacion: e.evento.ubicacion, fecha_evento: e.evento.fecha_evento, tipo_acceso: e.evento.tipo_acceso,
+      },
+    })),
   };
+}
+
+/** Operaciones pagadas por el usuario, independientes de sus entradas recibidas. */
+export async function getMisComprasPagadas(userId: string): Promise<CompraPagada[]> {
+  if (USE_MOCK) {
+    const { id, subtotal, cargos_servicio, total, estado_pago, comprobante_url, creado_en } = MOCK_COMPRA;
+    return [{ id, subtotal, cargos_servicio, total, estado_pago, comprobante_url, creado_en }];
+  }
+  if ((await getUsuarioActual())?.id !== userId) throw new Error('No tienes permisos para consultar estas compras.');
+  const supabase = await getSupabase();
+  const { data, error } = await supabase.from('compras')
+    .select('id, subtotal, cargos_servicio, total, estado_pago, comprobante_url, creado_en')
+    .eq('comprador_id', userId).order('creado_en', { ascending: false });
+  if (error) throw new Error('No se pudieron consultar tus compras.');
+  return (data ?? []).map(c => ({ ...c, id: String(c.id), subtotal: Number(c.subtotal), cargos_servicio: Number(c.cargos_servicio), total: Number(c.total) }));
 }

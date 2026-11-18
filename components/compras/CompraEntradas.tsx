@@ -9,12 +9,14 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { MAX_LINEAS, TASA_CARGO_SERVICIO, calcularResumen, maximoPorLinea } from '@/lib/compras/calculo'
 import { formatearPrecio } from '@/lib/eventos/format'
+import { obtenerIntentoCompra, completarIntentoCompra } from '@/lib/compras/intento'
 import type { EventoDetalle } from '@/lib/eventos/types'
 
 type Linea = { clave: number; tipoTicketId: string; cantidad: number }
 
 type Props = {
   evento: EventoDetalle
+  compradorId: string
   /** true si el usuario llegó con "Comprar para otros" (?para=otros) */
   paraOtrosInicial: boolean
 }
@@ -24,7 +26,7 @@ const claseSelect =
 const claseBotonCantidad =
   'flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-bg text-lg text-white transition hover:border-pink disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-border'
 
-export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
+export function CompraEntradas({ evento, compradorId, paraOtrosInicial }: Props) {
   const router = useRouter()
   const tickets = evento.tickets
   const disponibles = tickets.filter((t) => t.cantidad_disponible > 0)
@@ -39,7 +41,7 @@ export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
   const [errorCorreo, setErrorCorreo] = useState<string | null>(null)
   const [pendiente, startTransition] = useTransition()
   const [resultadoPrueba, setResultadoPrueba] = useState<'aprobado' | 'rechazado' | 'vencido'>('aprobado')
-  const intento = useRef<{ firma: string; id: string } | null>(null)
+  const enviando = useRef(false)
 
   const ticketDe = (id: string) => tickets.find((t) => t.id === id)
   const resumen = calcularResumen(lineas, tickets)
@@ -81,7 +83,8 @@ export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
   // ─── Envío ─────────────────────────────────────────────────────
   function enviar(e: React.FormEvent) {
     e.preventDefault()
-    if (pendiente) return
+    if (pendiente || enviando.current) return
+    enviando.current = true
     setErrorGeneral(null)
     setErrorCorreo(null)
 
@@ -89,18 +92,27 @@ export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
       try {
         const seleccion = {
           eventoId: evento.id,
-          lineas: lineas.map(({ tipoTicketId, cantidad }) => ({ tipoTicketId, cantidad })),
-          correoDestino: paraOtros ? correo : null,
+          lineas: lineas.map(({ tipoTicketId, cantidad }) => ({ tipoTicketId, cantidad })).sort((a, b) => a.tipoTicketId.localeCompare(b.tipoTicketId)),
+          correoDestino: paraOtros ? correo.trim().toLowerCase() : null,
           resultadoPrueba,
         }
         const firma = JSON.stringify(seleccion)
-        if (!intento.current || intento.current.firma !== firma) intento.current = { firma, id: crypto.randomUUID() }
-        const r = await comprarEntradas({ ...seleccion, solicitudId: intento.current.id })
-        if (r.ok) router.push(`/compra/confirmacion/${encodeURIComponent(r.compraId)}`)
+        let intento: { id: string; clave: string }
+        try { intento = await obtenerIntentoCompra(compradorId, evento.id, firma) } catch {
+          setErrorGeneral('No se pudo conservar la solicitud. Habilita el almacenamiento de esta pestaña antes de comprar.')
+          return
+        }
+        const r = await comprarEntradas({ ...seleccion, solicitudId: intento.id })
+        if (r.ok) {
+          completarIntentoCompra(intento.clave)
+          router.push(`/compra/confirmacion/${encodeURIComponent(r.compraId)}`)
+        }
         else if (r.campo === 'correo') setErrorCorreo(r.error)
         else setErrorGeneral(r.error)
       } catch {
         setErrorGeneral('No pudimos conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.')
+      } finally {
+        enviando.current = false
       }
     })
   }
@@ -274,6 +286,8 @@ export function CompraEntradas({ evento, paraOtrosInicial }: Props) {
                   <Input
                     label="Correo del destinatario"
                     type="email"
+                    maxLength={254}
+                    aria-label="Correo del destinatario"
                     name="correo"
                     placeholder="amigo@correo.com"
                     autoComplete="off"

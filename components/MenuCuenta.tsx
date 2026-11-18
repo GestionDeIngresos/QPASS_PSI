@@ -11,6 +11,7 @@ export type PerfilMenu = { nombre: string; correo: string; rol: string }
 const ENLACES_POR_ROL: Record<string, { href: string; etiqueta: string }[]> = {
   admin: [{ href: '/admin', etiqueta: 'Panel de administración' }],
   supervisor: [{ href: '/supervisor', etiqueta: 'Control de acceso' }],
+  ayudante: [{ href: '/ayudante', etiqueta: 'Panel de ayudante' }],
   organizador: [
     { href: '/organizador/solicitudes', etiqueta: 'Mis solicitudes de evento' },
     { href: '/organizador/eventos', etiqueta: 'Mis eventos' },
