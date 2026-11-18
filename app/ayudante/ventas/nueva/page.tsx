@@ -4,12 +4,14 @@ import Link from 'next/link';
 import { obtenerCatalogoAyudante } from '@/lib/ayudante/catalogo-server';
 import { CatalogoCarrito } from '@/components/ayudante/CatalogoCarrito';
 import { VentaIntegrada } from '@/components/ayudante/VentaIntegrada';
+import { VentaDemostracion } from '@/components/ayudante/VentaDemostracion';
 
 export default async function NuevaVentaPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { asignacion } = await obtenerContextoAyudante();
   if (asignacion.estado !== 'asignado') return <><h1 className="text-3xl font-extrabold">Nueva venta</h1><EstadoAsignacion asignacion={asignacion} /></>;
   const demostracion = (await searchParams).demo === 'catalogo';
   const datos = await obtenerCatalogoAyudante(asignacion.eventoId, demostracion);
+  if (datos.estado === 'disponible' && datos.modo === 'demostracion') return <VentaDemostracion catalogo={datos.catalogo} />;
   if (datos.estado === 'disponible' && datos.modo === 'integrado') return <>
     <h1 className="text-3xl font-extrabold">Nueva venta</h1>
     <EstadoAsignacion asignacion={asignacion} />
