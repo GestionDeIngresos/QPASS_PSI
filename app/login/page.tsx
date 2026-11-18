@@ -22,16 +22,30 @@ export default function LoginPage() {
     setError(null)
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-
-    if (error) {
-      setError('Correo o contraseña incorrectos.')
-      return
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        if (error.code === 'invalid_credentials') {
+          setError('Correo o contraseña incorrectos.')
+        } else if (error.code === 'email_not_confirmed') {
+          setError('Confirma tu correo antes de iniciar sesión.')
+        } else if (error.status === 429) {
+          setError('Demasiados intentos. Espera unos minutos antes de volver a intentar.')
+        } else if (error.name === 'AuthRetryableFetchError' || error.status === 0 || (error.status !== undefined && error.status >= 500)) {
+          setError('No pudimos conectar con el servicio de acceso. Inténtalo de nuevo.')
+        } else {
+          setError('No pudimos iniciar sesión. Inténtalo de nuevo.')
+        }
+        return
+      }
+      const next = new URLSearchParams(window.location.search).get('next')
+      router.push(next && next.startsWith('/') && !next.startsWith('//') ? next : '/eventos')
+      router.refresh()
+    } catch {
+      setError('No pudimos conectar con el servicio de acceso. Inténtalo de nuevo.')
+    } finally {
+      setLoading(false)
     }
-    const next = new URLSearchParams(window.location.search).get('next')
-    router.push(next && next.startsWith('/') && !next.startsWith('//') ? next : '/eventos')
-    router.refresh()
   }
 
   return (
